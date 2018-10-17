@@ -24,7 +24,7 @@ mod Throttle {
         
         /**/
         
-        pub fn expected(& self) -> Time::Ticks;
+        pub fn get_expected(& self) -> Time::Ticks;
         
         pub fn is_empty(& self) -> bool;
         

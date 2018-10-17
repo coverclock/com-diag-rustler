@@ -50,67 +50,110 @@ mod Gcra {
             self.alarmed1 = false;
             self.alarmed2 = false;         
         }
-
-        /**/
-        
-        pub fn request(& mut self, now: Time::Ticks) -> Time::Ticks {
-            
-        }
-        
-        pub fn commits(& mut self, events: Events) -> bool {
-            
-        }
-
-        pub fn commit(& mut self) -> bool {
-            
-        }
-        
-        pub fn admits(& mut self, now: Time::Ticks, events: Events) -> bool {
-            
-        }
-        
-        pub fn admit(& mut self, now: Time::Ticks) -> bool {
-            
-        }
-        
-        pub fn update(& mut self, now: Time::Ticks) -> bool {
-            
-        }
         
         /**/
         
-        pub fn expected(& self) -> Time::Ticks {
-            
+        pub fn get_expected(& self) -> Time::Ticks {
+            return self.expected;
         }
         
         pub fn is_empty(& self) -> bool {
-            
+            return self.empty1;
         }
         
         pub fn is_full(& self) -> bool {
-            
+            return self.full1;
         }
         
         pub fn is_alarmed(& self) -> bool {
-            
+            return self.alarmed1;
         }
         
         /**/
 
         pub fn emptied(& self) -> bool {
-            
+            return self.empty1 && (!self.empty2)
         }
         
         pub fn filled(& self) -> bool {
-            
+            return self.full1 && (!self.full2)
         }
         
         pub fn alarmed(& self) -> bool {
-            
+            return self.alarmed1 && (!self.alarmed2);
         }
         
         pub fn cleared(& self) -> bool {
+            return (!self.alarmed1) && self.alarmed2;
+        }
+
+        /**/
+        
+        pub fn request(& mut self, now: Time::Ticks) -> Time::Ticks {
+            let delay: ticks.Ticks;
+            let elapsed: ticks.Ticks;
             
+            self.now = now;
+            elapsed = self.now - self.then;
+            if self.expected <= elapsed {
+                self.deficit = 0;
+                self.full0 = false;
+                self.empty0 = true;
+                delay = 0;
+            } else {
+                self.deficit = self.expected - elapsed
+                if self.deficit <= self.limit {
+                    self.full0 = false;
+                    self.empty0 = false;
+                    delay = 0;
+                } else {
+                    self.full0 = true;
+                    self.empty0 = false;
+                    delay = self.deficit - self.limit
+                }
+            }
+        }
+        
+        pub fn commits(& mut self, events: Events) -> bool {
+            self.then = self.now;
+            self.expected = self.deficit;
+            if events <= 0 {
+                // Do nothing.
+            } else if events == 1 {
+                self.expected += self.increment;
+            } else {
+                self.expected += self.increment * events;
+            }
+            self.full2 = self.full1;
+            self.full1 = self.full0;
+            self.empty2 = self.empty1;
+            self.empty1 = self.empty0;
+            self.alarmed2 = self.alarmed1;
+            if self.emptied() {
+                self.alarmed1 = false;
+            } else if self.filled() {
+                self.alarmed1 = true;
+            } else {
+                // Do nothing.
+            }
+            return !self.alarmed1;
+        }
+            
+        pub fn commit(& mut self) -> bool {
+            self.commits(1)
+        }
+        
+        pub fn admits(& mut self, now: Time::Ticks, events: Events) -> bool {
+            self.request(now);
+            self.commits(events);
+        }
+        
+        pub fn admit(& mut self, now: Time::Ticks) -> bool {
+            self.admits(now, 1);
+        }
+        
+        pub fn update(& mut self, now: Time::Ticks) -> bool {
+            self.admits(now, 0) 
         }
    
     }

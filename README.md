@@ -41,6 +41,9 @@ programming language.
 "The Rust Programming Langauge",
 <https://www.rust-lang.org/en-US/>
 
+"Rust By Example",
+<https://doc.rust-lang.org/rust-by-example/index.html>
+
 ## Targets
 
 Various versions of this software has at one time or another been installed

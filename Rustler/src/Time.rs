@@ -5,18 +5,18 @@ mod Time {
     type Ticks = i64;
  
     pub fn frequency() -> Ticks {
-        unsafe { Diminuto::diminuto_frequency_f(); }
+        unsafe { Diminuto::diminuto_frequency_f() }
     }
     
     pub fn now() -> Ticks {
-        unsafe { Diminuto::diminuto_time_elapsed(); }
+        unsafe { Diminuto::diminuto_time_elapsed() }
     }
 
     pub fn sleep(ticks: Ticks) {
-        if delay > 0 {
-            unsafe { Diminuto::diminuto_delay(delay, 0); }
+        if ticks > 0 {
+            unsafe { Diminuto::diminuto_delay(ticks, 0) }
         } else {
-            unsafe { Diminuto::diminuto_yield(); }
+            unsafe { Diminuto::diminuto_yield() }
         }
     }
 

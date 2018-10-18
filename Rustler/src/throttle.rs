@@ -1,30 +1,30 @@
-use Time;
+use ticks::ticks;
 
-mod Throttle {
+mod throttle {
     
     type Events = i64;
     
     pub trait Throttle {
         
-        pub fn reset(& mut self, now: Time::Ticks);
+        pub fn reset(& mut self, now: ticks::Ticks);
         
         /**/
         
-        pub fn request(& mut self, now: Time::Ticks) -> Time::Ticks;
+        pub fn request(& mut self, now: ticks::Ticks) -> ticks::Ticks;
         
         pub fn commits(& mut self, events: Events) -> bool;
 
         pub fn commit(& mut self) -> bool;
         
-        pub fn admits(& mut self, now: Time::Ticks, events: Events) -> bool;
+        pub fn admits(& mut self, now: ticks::Ticks, events: Events) -> bool;
         
-        pub fn admit(& mut self, now: Time::Ticks) -> bool;
+        pub fn admit(& mut self, now: ticks::Ticks) -> bool;
         
-        pub fn update(& mut self, now: Time::Ticks) -> bool;
+        pub fn update(& mut self, now: ticks::Ticks) -> bool;
         
         /**/
         
-        pub fn get_expected(& self) -> Time::Ticks;
+        pub fn get_expected(& self) -> ticks::Ticks;
         
         pub fn is_empty(& self) -> bool;
         

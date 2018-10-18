@@ -32,9 +32,11 @@ programming language.
 
 ## Remarks
 
+I'm beginning to believe I'm not smart enough to write in Rust.
+
 ## Repositories
 
-<https://github.com/coverclock/com-diag-rust>
+<https://github.com/coverclock/com-diag-rustler>
 
 ## References
 

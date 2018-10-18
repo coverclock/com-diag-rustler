@@ -4,3 +4,8 @@ version = "0.1.0"
 authors = ["Chip Overclock <coverclock@diag.com>"]
 
 [dependencies]
+libc="6"
+libm="6"
+libdl="2"
+librt="1"
+libdiminuto="53.1"

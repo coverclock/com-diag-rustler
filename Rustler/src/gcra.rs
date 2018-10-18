@@ -1,16 +1,16 @@
 use std::string::ToString;
-use Time;
-use Throttle;
+use ticks::ticks;
+use throttle::throttle;
 
-mod Gcra {
+mod gcra {
     
     pub struct Gcra {
-        now:        Time::Ticks;
-        then:       Time::Ticks;
-        increment:  Time::Ticks;
-        limit:      Time::Ticks;
-        expected:   Time::Ticks;
-        deficit:    Time::Ticks;
+        now:        ticks::Ticks;
+        then:       ticks::Ticks;
+        increment:  ticks::Ticks;
+        limit:      ticks::Ticks;
+        expected:   ticks::Ticks;
+        deficit:    ticks::Ticks;
         full0:      bool;
         full1:      bool;
         full2:      bool;
@@ -36,7 +36,7 @@ mod Gcra {
    
     pub impl Throttle for Gcra {
         
-        pub fn reset(& mut self, now: Time::Ticks) {
+        pub fn reset(& mut self, now: ticks::Ticks) {
             self.now = now;
             self.then = this.now - self.increment;
             self.expected = 0;
@@ -53,7 +53,7 @@ mod Gcra {
         
         /**/
         
-        pub fn get_expected(& self) -> Time::Ticks {
+        pub fn get_expected(& self) -> ticks::Ticks {
             return self.expected;
         }
         
@@ -89,7 +89,7 @@ mod Gcra {
 
         /**/
         
-        pub fn request(& mut self, now: Time::Ticks) -> Time::Ticks {
+        pub fn request(& mut self, now: ticks::Ticks) -> ticks::Ticks {
             let delay: ticks.Ticks;
             let elapsed: ticks.Ticks;
             
@@ -143,16 +143,16 @@ mod Gcra {
             self.commits(1)
         }
         
-        pub fn admits(& mut self, now: Time::Ticks, events: Events) -> bool {
+        pub fn admits(& mut self, now: ticks::Ticks, events: throttle::Events) -> bool {
             self.request(now);
             self.commits(events);
         }
         
-        pub fn admit(& mut self, now: Time::Ticks) -> bool {
+        pub fn admit(& mut self, now: ticks::Ticks) -> bool {
             self.admits(now, 1);
         }
         
-        pub fn update(& mut self, now: Time::Ticks) -> bool {
+        pub fn update(& mut self, now: ticks::Ticks) -> bool {
             self.admits(now, 0) 
         }
    
@@ -160,24 +160,24 @@ mod Gcra {
         
     pub impl Gcra {
         
-        pub fn init(& mut self, increment: Time::Ticks, limit: Time::Ticks, now: Time::Ticks) {
+        pub fn init(& mut self, increment: ticks::Ticks, limit: ticks::Ticks, now: ticks::Ticks) {
             self.increment = increment;
             self.limit = limit;
             reset(now);
         }
         
-        pub fn new(increment: Time::Ticks, limit: Time::Ticks, now: Time::Ticks) -> Gcra {
+        pub fn new(increment: ticks::Ticks, limit: ticks::Ticks, now: ticks::Ticks) -> Gcra {
             let mut gcra = Gcra::new();
-            init(gcra, increment, limit, now);
+            gcra.init(increment, limit, now);
             return gcra;
        }
 
     }
     
-    pub fun increment(numerator: Throttle::Events, denominator: Throttle::Events, frequency: Time::Ticks) -> Time::Ticks {
-        let i: Time::Ticks;
-        let n: Throttle::Events = numerator;
-        let d: Throottle::Events = denominator;
+    pub fun increment(numerator: throttle::Events, denominator: throttle::Events, frequency: ticks::Ticks) -> ticks::Ticks {
+        let i: ticks::Ticks;
+        let n: throttle::Events = numerator;
+        let d: throttle::Events = denominator;
         
         i = frequency;
         if d > 1 {
@@ -193,8 +193,8 @@ mod Gcra {
         }
     }
     
-    pub fun jittertolerance(peak: Time::Ticks, burstsize: Throttle::Events) -> Time::Ticks {
-        let l: Time::Ticks;
+    pub fun jittertolerance(peak: ticks::Ticks, burstsize: throttle::Events) -> ticks::Ticks {
+        let l: ticks::Ticks;
         
         if burstsize > 1 {
             l = (burstsize - 1) * peak

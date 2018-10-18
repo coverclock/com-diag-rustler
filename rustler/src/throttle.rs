@@ -1,46 +1,46 @@
-use ticks::ticks;
+pub mod throttle {
 
-mod throttle {
-    
+    use ticks::ticks;
+ 
     type Events = i64;
     
-    pub trait Throttle {
+    trait Throttle {
         
-        pub fn reset(& mut self, now: ticks::Ticks);
+        fn reset(& mut self, now: ticks::Ticks);
         
         /**/
         
-        pub fn request(& mut self, now: ticks::Ticks) -> ticks::Ticks;
+        fn request(& mut self, now: ticks::Ticks) -> ticks::Ticks;
         
-        pub fn commits(& mut self, events: Events) -> bool;
+        fn commits(& mut self, events: Events) -> bool;
 
-        pub fn commit(& mut self) -> bool;
+        fn commit(& mut self) -> bool;
         
-        pub fn admits(& mut self, now: ticks::Ticks, events: Events) -> bool;
+        fn admits(& mut self, now: ticks::Ticks, events: Events) -> bool;
         
-        pub fn admit(& mut self, now: ticks::Ticks) -> bool;
+        fn admit(& mut self, now: ticks::Ticks) -> bool;
         
-        pub fn update(& mut self, now: ticks::Ticks) -> bool;
+        fn update(& mut self, now: ticks::Ticks) -> bool;
         
         /**/
         
-        pub fn get_expected(& self) -> ticks::Ticks;
+        fn get_expected(& self) -> ticks::Ticks;
         
-        pub fn is_empty(& self) -> bool;
+        fn is_empty(& self) -> bool;
         
-        pub fn is_full(& self) -> bool;
+        fn is_full(& self) -> bool;
         
-        pub fn is_alarmed(& self) -> bool;
+        fn is_alarmed(& self) -> bool;
         
         /**/
 
-        pub fn emptied(& self) -> bool;
+        fn emptied(& self) -> bool;
         
-        pub fn filled(& self) -> bool;
+        fn filled(& self) -> bool;
         
-        pub fn alarmed(& self) -> bool;
+        fn alarmed(& self) -> bool;
         
-        pub fn cleared(& self) -> bool;
+        fn cleared(& self) -> bool;
    
     }
     

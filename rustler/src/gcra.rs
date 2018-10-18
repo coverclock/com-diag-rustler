@@ -1,27 +1,27 @@
-use std::string::ToString;
-use ticks::ticks;
-use throttle::throttle;
+pub mod gcra {
 
-mod gcra {
-    
-    pub struct Gcra {
-        now:        ticks::Ticks;
-        then:       ticks::Ticks;
-        increment:  ticks::Ticks;
-        limit:      ticks::Ticks;
-        expected:   ticks::Ticks;
-        deficit:    ticks::Ticks;
-        full0:      bool;
-        full1:      bool;
-        full2:      bool;
-        empty0:     bool;
-        empty1:     bool;
-        empty2:     bool;
-        alarmed1:   bool
-        alarmed2:   bool;
+    use std::string::ToString;
+    use ticks::ticks;
+    use throttle::throttle;
+  
+    struct Gcra {
+        now:        ticks::Ticks,
+        then:       ticks::Ticks,
+        increment:  ticks::Ticks,
+        limit:      ticks::Ticks,
+        expected:   ticks::Ticks,
+        deficit:    ticks::Ticks,
+        full0:      bool,
+        full1:      bool,
+        full2:      bool,
+        empty0:     bool,
+        empty1:     bool,
+        empty2:     bool,
+        alarmed1:   bool,
+        alarmed2:   bool,
     }
     
-    pub impl ToString for Gcra {
+    impl ToString for Gcra {
         
         pub fn to_string(& self) -> String {
             format!("Gcra(T={},I={},L={},X={},X1={},F=({},{},{}),E=({},{},{}),A=({},{}))",
@@ -34,7 +34,7 @@ mod gcra {
 
     }
    
-    pub impl Throttle for Gcra {
+    impl Throttle for Gcra {
         
         pub fn reset(& mut self, now: ticks::Ticks) {
             self.now = now;
@@ -90,8 +90,8 @@ mod gcra {
         /**/
         
         pub fn request(& mut self, now: ticks::Ticks) -> ticks::Ticks {
-            let delay: ticks.Ticks;
-            let elapsed: ticks.Ticks;
+            let delay: ticks::Ticks;
+            let elapsed: ticks::Ticks;
             
             self.now = now;
             elapsed = self.now - self.then;
@@ -101,7 +101,7 @@ mod gcra {
                 self.empty0 = true;
                 delay = 0;
             } else {
-                self.deficit = self.expected - elapsed
+                self.deficit = self.expected - elapsed;
                 if self.deficit <= self.limit {
                     self.full0 = false;
                     self.empty0 = false;
@@ -109,7 +109,7 @@ mod gcra {
                 } else {
                     self.full0 = true;
                     self.empty0 = false;
-                    delay = self.deficit - self.limit
+                    delay = self.deficit - self.limit;
                 }
             }
         }
@@ -158,7 +158,7 @@ mod gcra {
    
     }
         
-    pub impl Gcra {
+    impl Gcra {
         
         pub fn init(& mut self, increment: ticks::Ticks, limit: ticks::Ticks, now: ticks::Ticks) {
             self.increment = increment;
@@ -174,7 +174,7 @@ mod gcra {
 
     }
     
-    pub fun increment(numerator: throttle::Events, denominator: throttle::Events, frequency: ticks::Ticks) -> ticks::Ticks {
+    pub fn increment(numerator: throttle::Events, denominator: throttle::Events, frequency: ticks::Ticks) -> ticks::Ticks {
         let i: ticks::Ticks;
         let n: throttle::Events = numerator;
         let d: throttle::Events = denominator;
@@ -185,19 +185,19 @@ mod gcra {
         }
         if n <= 1 {
             // Do nothing.
-        } else if (i % n) > 0) {
-            i /= n
-            i += 1
+        } else if (i % n) > 0 {
+            i /= n;
+            i += 1;
         } else {
-            i /= n
+            i /= n;
         }
     }
     
-    pub fun jittertolerance(peak: ticks::Ticks, burstsize: throttle::Events) -> ticks::Ticks {
+    pub fn jittertolerance(peak: ticks::Ticks, burstsize: throttle::Events) -> ticks::Ticks {
         let l: ticks::Ticks;
         
         if burstsize > 1 {
-            l = (burstsize - 1) * peak
+            l = (burstsize - 1) * peak;
         } else {
             l = 0;
         }

@@ -14,7 +14,7 @@ pub mod ticks {
     use std::time;
     use std::thread;
 
-    pub type Ticks = u64;
+    pub type Ticks = i64;
 
     static INIT: sync::Once = sync::Once::new();
     static mut EPOCH: option::Option<time::Instant> = option::Option::None;
@@ -29,11 +29,13 @@ pub mod ticks {
             let then: time::Instant = EPOCH.unwrap();
             let now: time::Instant = time::Instant::now();
             let elapsed: time::Duration = now.duration_since(then);
-            let mut ticks: Ticks = elapsed.as_secs();
-            let fraction: u32 = elapsed.subsec_nanos();
+            let seconds: u64 = elapsed.as_secs();
+            let nanoseconds: u32 = elapsed.subsec_nanos();
+            let mut ticks: Ticks;
 
+            ticks = seconds as i64;
             ticks *= frequency();
-            ticks += fraction as u64;
+            ticks += nanoseconds as i64;
             
             return ticks;
         }
@@ -41,9 +43,9 @@ pub mod ticks {
 
     pub fn sleep(ticks: Ticks) {
         if ticks > 0 {
-            let s: u64 = ticks / frequency();
-            let ns: u64 = ticks % frequency();
-            thread::sleep(time::Duration::new(s, ns as u32)); 
+            let s: Ticks = ticks / frequency();
+            let ns: Ticks = ticks % frequency();
+            thread::sleep(time::Duration::new(s as u64, ns as u32)); 
         } else {
             thread::yield_now();
         }

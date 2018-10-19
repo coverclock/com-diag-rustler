@@ -10,7 +10,7 @@
 pub mod gcra {
 
     use std::string;
-    use std::u64;
+    use std::i64;
     use ticks::ticks;
     use throttle::throttle;
   
@@ -227,7 +227,7 @@ pub mod gcra {
         }
 
         if numerator < 1 {
-            increment = u64::max_value();
+            increment = i64::max_value();
         } else  if numerator == 1 {
             // Do nothing.
         } else if (increment % numerator) == 0 {

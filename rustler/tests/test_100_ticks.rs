@@ -15,7 +15,7 @@ use rustler::ticks::ticks;
 fn test_ticks_100_frequency() {
     let frequency: ticks::Ticks = ticks::frequency();
     eprintln!("frequency={}", frequency);
-    assert_eq!(frequency, 1000000000);
+    assert!(frequency == 1000000000);
 }
 
 #[test]

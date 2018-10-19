@@ -11,7 +11,7 @@ pub mod throttle {
 
     use ticks::ticks;
  
-    pub type Events = u64;
+    pub type Events = i64;
     
     pub trait Throttle {
         

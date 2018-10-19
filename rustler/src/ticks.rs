@@ -14,13 +14,13 @@ pub mod ticks {
     use std::time;
     use std::thread;
 
-    type Ticks = u64;
+    pub type Ticks = u64;
 
     static INIT: sync::Once = sync::Once::new();
     static mut EPOCH: option::Option<time::Instant> = option::Option::None;
 
     pub fn frequency() -> Ticks {
-        return 1_000_000_000;
+        1_000_000_000
     }
  
     pub fn now() -> Ticks {
@@ -34,7 +34,7 @@ pub mod ticks {
 
             ticks *= frequency();
             ticks += fraction as u64;
-
+            
             return ticks;
         }
     }

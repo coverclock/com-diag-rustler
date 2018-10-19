@@ -11,9 +11,9 @@ pub mod throttle {
 
     use ticks::ticks;
  
-    type Events = i64;
+    pub type Events = u64;
     
-    trait Throttle {
+    pub trait Throttle {
         
         fn reset(& mut self, now: ticks::Ticks);
         

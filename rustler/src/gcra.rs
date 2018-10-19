@@ -9,7 +9,8 @@
 
 pub mod gcra {
 
-    use std::string::ToString;
+    use std::string;
+    use std::u64;
     use ticks::ticks;
     use throttle::throttle;
   
@@ -30,24 +31,24 @@ pub mod gcra {
         alarmed2:   bool,
     }
     
-    impl ToString for Gcra {
+    impl string::ToString for Gcra {
         
-        pub fn to_string(& self) -> String {
+        fn to_string(& self) -> String {
             format!("Gcra(T={},I={},L={},X={},X1={},F=({},{},{}),E=({},{},{}),A=({},{}))",
                 self.now - self.then,
                 self.increment, self.limit, self.expected, self.deficit,
                 self.full0, self.full1, self.full2,
                 self.empty0, self.empty1, self.empty2,
-                self.alarmed1, self.alarmed2);
+                self.alarmed1, self.alarmed2)
         }
 
     }
    
-    impl Throttle for Gcra {
+    impl throttle::Throttle for Gcra {
         
-        pub fn reset(& mut self, now: ticks::Ticks) {
+        fn reset(& mut self, now: ticks::Ticks) {
             self.now = now;
-            self.then = this.now - self.increment;
+            self.then = self.now - self.increment;
             self.expected = 0;
             self.deficit = 0;
             self.full0 = false;
@@ -59,46 +60,46 @@ pub mod gcra {
             self.alarmed1 = false;
             self.alarmed2 = false;         
         }
-        
+       
         /**/
         
-        pub fn get_expected(& self) -> ticks::Ticks {
+        fn get_expected(& self) -> ticks::Ticks {
             return self.expected;
         }
         
-        pub fn is_empty(& self) -> bool {
+        fn is_empty(& self) -> bool {
             return self.empty1;
         }
         
-        pub fn is_full(& self) -> bool {
+        fn is_full(& self) -> bool {
             return self.full1;
         }
         
-        pub fn is_alarmed(& self) -> bool {
+        fn is_alarmed(& self) -> bool {
             return self.alarmed1;
         }
         
         /**/
 
-        pub fn emptied(& self) -> bool {
+        fn emptied(& self) -> bool {
             return self.empty1 && (!self.empty2)
         }
         
-        pub fn filled(& self) -> bool {
+        fn filled(& self) -> bool {
             return self.full1 && (!self.full2)
         }
         
-        pub fn alarmed(& self) -> bool {
+        fn alarmed(& self) -> bool {
             return self.alarmed1 && (!self.alarmed2);
         }
         
-        pub fn cleared(& self) -> bool {
+        fn cleared(& self) -> bool {
             return (!self.alarmed1) && self.alarmed2;
         }
 
         /**/
         
-        pub fn request(& mut self, now: ticks::Ticks) -> ticks::Ticks {
+        fn request(& mut self, now: ticks::Ticks) -> ticks::Ticks {
             let delay: ticks::Ticks;
             let elapsed: ticks::Ticks;
             
@@ -121,9 +122,11 @@ pub mod gcra {
                     delay = self.deficit - self.limit;
                 }
             }
+            
+            return delay;
         }
         
-        pub fn commits(& mut self, events: Events) -> bool {
+        fn commits(& mut self, events: throttle::Events) -> bool {
             self.then = self.now;
             self.expected = self.deficit;
             if events <= 0 {
@@ -145,71 +148,110 @@ pub mod gcra {
             } else {
                 // Do nothing.
             }
+
             return !self.alarmed1;
         }
             
-        pub fn commit(& mut self) -> bool {
+        fn commit(& mut self) -> bool {
             self.commits(1)
         }
         
-        pub fn admits(& mut self, now: ticks::Ticks, events: throttle::Events) -> bool {
+        fn admits(& mut self, now: ticks::Ticks, events: throttle::Events) -> bool {
             self.request(now);
-            self.commits(events);
+            self.commits(events)
         }
         
-        pub fn admit(& mut self, now: ticks::Ticks) -> bool {
-            self.admits(now, 1);
+        fn admit(& mut self, now: ticks::Ticks) -> bool {
+            self.admits(now, 1)
         }
         
-        pub fn update(& mut self, now: ticks::Ticks) -> bool {
+        fn update(& mut self, now: ticks::Ticks) -> bool {
             self.admits(now, 0) 
         }
    
     }
-        
+    
+    use throttle::throttle::Throttle; // For init(): self.reset(now) below.
+
     impl Gcra {
         
+        pub fn new() -> Gcra {
+            Gcra {
+                now:        0,
+                then:       0,
+                increment:  0,
+                limit:      0,
+                expected:   0,
+                deficit:    0,
+                full0:      false,
+                full1:      false,
+                full2:      false,
+                empty0:     true,
+                empty1:     true,
+                empty2:     true,
+                alarmed1:   false,
+                alarmed2:   false,
+            }
+        }
+         
         pub fn init(& mut self, increment: ticks::Ticks, limit: ticks::Ticks, now: ticks::Ticks) {
             self.increment = increment;
             self.limit = limit;
-            reset(now);
+            self.reset(now);
         }
-        
-        pub fn new(increment: ticks::Ticks, limit: ticks::Ticks, now: ticks::Ticks) -> Gcra {
-            let mut gcra = Gcra::new();
-            gcra.init(increment, limit, now);
-            return gcra;
-       }
 
     }
     
     pub fn increment(numerator: throttle::Events, denominator: throttle::Events, frequency: ticks::Ticks) -> ticks::Ticks {
-        let i: ticks::Ticks;
-        let n: throttle::Events = numerator;
-        let d: throttle::Events = denominator;
+        let mut increment: ticks::Ticks = 0;
         
-        i = frequency;
-        if d > 1 {
-            i *= d;
-        }
-        if n <= 1 {
+        /*
+         * rate: EVENTS/SECOND
+         * numerator: EVENTS
+         * denominator: SECONDS
+         * frequency: TICKS/SECOND
+         * increment = ( 1 / rate ) * frequency
+         * increment = ( 1 / ( numerator / denominator )) * frequency
+         * increment = ( denominator / numerator ) * frequency
+         * increment = ( denominator * frequency ) / numerator
+         * increment: TICKS/EVENT
+         */
+
+        if denominator < 1 {
             // Do nothing.
-        } else if (i % n) > 0 {
-            i /= n;
-            i += 1;
+        } else if denominator == 1 {
+            increment = frequency;
         } else {
-            i /= n;
+            increment = frequency;
+            increment *= denominator;
         }
+
+        if numerator < 1 {
+            increment = u64::max_value();
+        } else  if numerator == 1 {
+            // Do nothing.
+        } else if (increment % numerator) == 0 {
+            increment /= numerator;
+        } else {
+            increment /= numerator;
+            increment += 1;
+        }
+        
+        return increment;
     }
     
-    pub fn jittertolerance(peak: ticks::Ticks, burstsize: throttle::Events) -> ticks::Ticks {
-        let l: ticks::Ticks;
+    pub fn jittertolerance(increment: ticks::Ticks, burstsize: throttle::Events) -> ticks::Ticks {
+        let mut limit: ticks::Ticks = 0;
         
-        if burstsize > 1 {
-            l = (burstsize - 1) * peak;
+        if increment <= 0 {
+            // Do nothing.
+        } else if burstsize <= 1 {
+            // Do nothing.
         } else {
-            l = 0;
+            limit = (burstsize - 1) * increment;
         }
+        
+        return limit;
     }
 
 }

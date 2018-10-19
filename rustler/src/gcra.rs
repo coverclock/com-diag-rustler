@@ -14,7 +14,7 @@ pub mod gcra {
     use ticks::ticks;
     use throttle::throttle;
   
-    struct Gcra {
+    pub struct Gcra {
         now:        ticks::Ticks,
         then:       ticks::Ticks,
         increment:  ticks::Ticks,

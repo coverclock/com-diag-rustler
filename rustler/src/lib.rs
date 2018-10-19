@@ -12,3 +12,4 @@
 mod ticks;
 mod throttle;
 mod gcra;
+mod contract;

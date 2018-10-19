@@ -58,11 +58,15 @@ Intel x86_64 64-bit
 Intel Core i7-5557U @ 3.10GHz x 2 x 2    
 Ubuntu 18.04 "bionic"    
 Linux 4.15.0    
-rustc 1.29.1 (b801ae664 2018-09-20)    
+rustc 1.29.2 (17a9dc751 2018-10-05)    
 
-## Installation
+## Build
+
+    cargo build
 
 ## Unit Tests
+
+    cargo test -- --nocapture
 
 ## Functional Tests
 

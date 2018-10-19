@@ -9,7 +9,7 @@
 
 #[allow(dead_code)]
 
-mod ticks;
-mod throttle;
-mod gcra;
-mod contract;
+pub mod ticks;
+pub mod throttle;
+pub mod gcra;
+pub mod contract;

@@ -9,9 +9,9 @@
 extern crate rustler;
 
 use rustler::ticks::ticks;
-use rustler::gcra::gcra;
 use rustler::throttle::throttle;
 use rustler::throttle::throttle::Throttle;
+use rustler::gcra::gcra;
 
 mod harness;
 
@@ -563,4 +563,30 @@ fn test_gcra_300_variable() {
     eprintln!("gcra={}", throttle.to_string());
     throttle.init(increment, limit, now);
     eprintln!("gcra={}", throttle.to_string());
+}
+
+#[test]
+fn test_gcra_400_simulated() {
+    let frequency: ticks::Ticks = ticks::frequency();
+    let increment: ticks::Ticks = gcra::increment(1024, 1, frequency);
+    let burstsize: throttle::Events = 32768;
+    let limit: ticks::Ticks = gcra::jittertolerance(increment, burstsize);
+    let iterations: throttle::Events = 1000000;
+    let now: ticks::Ticks = ticks::now();
+    let mut shaper: gcra::Gcra = gcra::Gcra::new();
+    let mut policer: gcra::Gcra = gcra::Gcra::new();
+    /**/
+    eprintln!("shaper={}", shaper.to_string());
+    eprintln!("policer={}", policer.to_string());
+    /**/
+    shaper.init(increment, 0, now);
+    policer.init(increment, limit, now);
+    /**/
+    eprintln!("shaper={}", shaper.to_string());
+    eprintln!("policer={}", policer.to_string());
+    /**/
+    harness::simulate(& mut shaper, & mut policer, burstsize, iterations);
+    /**/
+    eprintln!("shaper={}", shaper.to_string());
+    eprintln!("policer={}", policer.to_string());
 }

@@ -28,11 +28,15 @@ Wheat Ridge CO 80033
 ## Abstract
 
 This repository contains the results of my attempts to learn the Rust
-programming language.
+programming language. I did this in my usual fashion: by porting my "go to"
+learning example, the generic cell rate algorithm. So far, I've successfully
+implemented and tested the GCRA in C++, Java, C, Go, and Rust.
 
 ## Remarks
 
-I'm beginning to believe I'm not smart enough to write in Rust.
+I am reminded of a remark made by a colleage of mine from decades ago about
+the Ada programming language: "If you can get your program to compile, it
+often runs the first time".
 
 ## Repositories
 
@@ -41,7 +45,7 @@ I'm beginning to believe I'm not smart enough to write in Rust.
 ## References
 
 "The Rust Programming Langauge",
-<https://www.rust-lang.org/en-US/>
+<https://doc.rust-lang.org/book/2018-edition/foreword.html>
 
 "Rust By Example",
 <https://doc.rust-lang.org/rust-by-example/index.html>

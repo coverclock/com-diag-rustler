@@ -388,6 +388,12 @@ fn test_gcra_300_fixed() {
 }
 
 /*
+fn blocksize(maximum: throttle::Events) -> throttle::Events {
+    return maximum / 2;
+}
+*/
+
+/*
 extern crate rand;
 
 use rand::Rng;
@@ -400,8 +406,17 @@ fn blocksize(maximum: throttle::Events) -> throttle::Events {
 }
 */
 
+extern {
+    fn rand() -> i32; // <stdlib.h> x86_64 gcc 7.3.0 sizeof(int)==4
+}
+    
 fn blocksize(maximum: throttle::Events) -> throttle::Events {
-    return maximum / 2;
+    unsafe {
+        let size: throttle::Events = ((rand() % (maximum as i32)) + 1) as throttle::Events;
+        assert!(size >= 1);
+        assert!(size <= maximum);
+        return size;
+    }
 }
 
 #[test]
@@ -571,7 +586,6 @@ fn test_gcra_300_variable() {
     assert!(throttle.request(now) == 0);
     size = blocksize(maximum);
     assert!(throttle.commits(size));
-    size = blocksize(maximum);
     now += size * increment;
     assert!(throttle.request(now) == 0);
     size = blocksize(maximum);

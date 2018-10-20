@@ -5,7 +5,6 @@
 // Author: Chip Overclock
 // mailto:coverclock@diag.com
 // https://github.com/coverclock/com-diag-rustler
-//
 
 pub mod ticks {
 

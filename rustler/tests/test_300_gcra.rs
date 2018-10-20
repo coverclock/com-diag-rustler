@@ -5,7 +5,6 @@
 // Author: Chip Overclock
 // mailto:coverclock@diag.com
 // https://github.com/coverclock/com-diag-rustler
-//
 
 extern crate rustler;
 
@@ -13,6 +12,8 @@ use rustler::ticks::ticks;
 use rustler::gcra::gcra;
 use rustler::throttle::throttle;
 use rustler::throttle::throttle::Throttle;
+
+mod harness;
 
 #[test]
 fn test_gcra_100_increment() {
@@ -387,38 +388,6 @@ fn test_gcra_300_fixed() {
     eprintln!("gcra={}", throttle.to_string());
 }
 
-/*
-fn blocksize(maximum: throttle::Events) -> throttle::Events {
-    return maximum / 2;
-}
-*/
-
-/*
-extern crate rand;
-
-use rand::Rng;
-
-fn blocksize(maximum: throttle::Events) -> throttle::Events {
-    let mut rng = rand::thread_rng();
-    let size: throttle::Events = rng.gen_range(0, maximum) + 1;
-    
-    return size;
-}
-*/
-
-extern {
-    fn rand() -> i32; // <stdlib.h> x86_64 gcc 7.3.0 sizeof(int)==4
-}
-    
-fn blocksize(maximum: throttle::Events) -> throttle::Events {
-    unsafe {
-        let size: throttle::Events = ((rand() % (maximum as i32)) + 1) as throttle::Events;
-        assert!(size >= 1);
-        assert!(size <= maximum);
-        return size;
-    }
-}
-
 #[test]
 fn test_gcra_300_variable() {
     let mut throttle: gcra::Gcra = gcra::Gcra::new();
@@ -434,101 +403,101 @@ fn test_gcra_300_variable() {
     /* SUSTAINED */
     now = 0;
     assert!(throttle.request(now) == 0);
-    size = blocksize(maximum);
+    size = harness::blocksize(maximum);
     assert!(throttle.commits(size));
     now += size * increment;
     assert!(throttle.request(now) == 0);
-    size = blocksize(maximum);
+    size = harness::blocksize(maximum);
     assert!(throttle.commits(size));
     now += size * increment;
     assert!(throttle.request(now) == 0);
-    size = blocksize(maximum);
+    size = harness::blocksize(maximum);
     assert!(throttle.commits(size));
     now += size * increment;
     assert!(throttle.request(now) == 0);
-    size = blocksize(maximum);
+    size = harness::blocksize(maximum);
     assert!(throttle.commits(size));
     now += size * increment;
     assert!(throttle.request(now) == 0);
-    size = blocksize(maximum);
+    size = harness::blocksize(maximum);
     assert!(throttle.commits(size));
     now += size * increment;
     assert!(throttle.request(now) == 0);
-    size = blocksize(maximum);
+    size = harness::blocksize(maximum);
     assert!(throttle.commits(size));
     now += size * increment;
     assert!(throttle.request(now) == 0);
-    size = blocksize(maximum);
+    size = harness::blocksize(maximum);
     assert!(throttle.commits(size));
     now += size * increment;
     assert!(throttle.request(now) == 0);
-    size = blocksize(maximum);
+    size = harness::blocksize(maximum);
     assert!(throttle.commits(size));
     now += size * increment;
     assert!(throttle.request(now) == 0);
-    size = blocksize(maximum);
+    size = harness::blocksize(maximum);
     assert!(throttle.commits(size));
     now += size * increment;
     assert!(throttle.request(now) == 0);
-    size = blocksize(maximum);
+    size = harness::blocksize(maximum);
     assert!(throttle.commits(size));
     now += size * increment;
     assert!(throttle.request(now) == 0);
-    size = blocksize(maximum);
+    size = harness::blocksize(maximum);
     assert!(throttle.commits(size));
     /* CONSUME LIMIT */
     now += (size * increment) - 1;
     assert!(throttle.request(now) == 0);
-    size = blocksize(maximum);
+    size = harness::blocksize(maximum);
     assert!(throttle.commits(size));
     now += (size * increment) - 1;
     assert!(throttle.request(now) == 0);
-    size = blocksize(maximum);
+    size = harness::blocksize(maximum);
     assert!(throttle.commits(size));
     now += (size * increment) - 1;
     assert!(throttle.request(now) == 0);
-    size = blocksize(maximum);
+    size = harness::blocksize(maximum);
     assert!(throttle.commits(size));
     now += (size * increment) - 1;
     assert!(throttle.request(now) == 0);
-    size = blocksize(maximum);
+    size = harness::blocksize(maximum);
     assert!(throttle.commits(size));
     now += (size * increment) - 1;
     assert!(throttle.request(now) == 0);
-    size = blocksize(maximum);
+    size = harness::blocksize(maximum);
     assert!(throttle.commits(size));
     now += (size * increment) - 1;
     assert!(throttle.request(now) == 0);
-    size = blocksize(maximum);
+    size = harness::blocksize(maximum);
     assert!(throttle.commits(size));
     now += (size * increment) - 1;
     assert!(throttle.request(now) == 0);
-    size = blocksize(maximum);
+    size = harness::blocksize(maximum);
     assert!(throttle.commits(size));
     now += (size * increment) - 1;
     assert!(throttle.request(now) == 0);
-    size = blocksize(maximum);
+    size = harness::blocksize(maximum);
     assert!(throttle.commits(size));
     now += (size * increment) - 1;
     assert!(throttle.request(now) == 0);
-    size = blocksize(maximum);
+    size = harness::blocksize(maximum);
     assert!(throttle.commits(size));
     now += (size * increment) - 1;
     assert!(throttle.request(now) == 0);
-    size = blocksize(maximum);
+    size = harness::blocksize(maximum);
     assert!(throttle.commits(size));
     /* FILL */
     now += (size * increment) - 2;
     assert!(throttle.request(now) == 2);
-    size = blocksize(maximum);
+    size = harness::blocksize(maximum);
     assert!(!throttle.commits(size));
     now += (size * increment) + 1;
     assert!(throttle.request(now) == 1);
-    size = blocksize(maximum);
+    size = harness::blocksize(maximum);
     assert!(!throttle.commits(size));
     now += (size * increment) + 1;
     assert!(throttle.request(now) == 0);
-    size = blocksize(maximum);
+    size = harness::blocksize(maximum);
     assert!(!throttle.commits(size));
     /* REQUEST, RE-REQUESTS, COMMIT */
     now += (size * increment) - 2;
@@ -537,58 +506,58 @@ fn test_gcra_300_variable() {
     assert!(throttle.request(now) == 1);
     now += 1;
     assert!(throttle.request(now) == 0);
-    size = blocksize(maximum);
+    size = harness::blocksize(maximum);
     assert!(!throttle.commits(size));
     /* REQUEST, DELAY, ADMIT */
     now += (size * increment) - 2;
     assert!(throttle.request(now) == 2);
     now += 2;
-    size = blocksize(maximum);
+    size = harness::blocksize(maximum);
     assert!(!throttle.admits(now, size));
     /* SUSTAINED AGAIN */
     now += (size * increment) + 10;
     assert!(throttle.request(now) == 0);
-    size = blocksize(maximum);
+    size = harness::blocksize(maximum);
     assert!(throttle.commits(size));
     now += size * increment;
     assert!(throttle.request(now) == 0);
-    size = blocksize(maximum);
+    size = harness::blocksize(maximum);
     assert!(throttle.commits(size));
     now += size * increment;
     assert!(throttle.request(now) == 0);
-    size = blocksize(maximum);
+    size = harness::blocksize(maximum);
     assert!(throttle.commits(size));
     now += size * increment;
     assert!(throttle.request(now) == 0);
-    size = blocksize(maximum);
+    size = harness::blocksize(maximum);
     assert!(throttle.commits(size));
     now += size * increment;
     assert!(throttle.request(now) == 0);
-    size = blocksize(maximum);
+    size = harness::blocksize(maximum);
     assert!(throttle.commits(size));
     now += size * increment;
     assert!(throttle.request(now) == 0);
-    size = blocksize(maximum);
+    size = harness::blocksize(maximum);
     assert!(throttle.commits(size));
     now += size * increment;
     assert!(throttle.request(now) == 0);
-    size = blocksize(maximum);
+    size = harness::blocksize(maximum);
     assert!(throttle.commits(size));
     now += size * increment;
     assert!(throttle.request(now) == 0);
-    size = blocksize(maximum);
+    size = harness::blocksize(maximum);
     assert!(throttle.commits(size));
     now += size * increment;
     assert!(throttle.request(now) == 0);
-    size = blocksize(maximum);
+    size = harness::blocksize(maximum);
     assert!(throttle.commits(size));
     now += size * increment;
     assert!(throttle.request(now) == 0);
-    size = blocksize(maximum);
+    size = harness::blocksize(maximum);
     assert!(throttle.commits(size));
     now += size * increment;
     assert!(throttle.request(now) == 0);
-    size = blocksize(maximum);
+    size = harness::blocksize(maximum);
     assert!(throttle.commits(size));
     /**/
     eprintln!("gcra={}", throttle.to_string());

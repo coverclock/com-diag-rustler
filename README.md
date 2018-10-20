@@ -66,7 +66,7 @@ rustc 1.29.2 (17a9dc751 2018-10-05)
 
 ## Unit Tests
 
-    cargo test -- --nocapture
+    cargo test -- --nocapture --test-threads=1
 
 ## Functional Tests
 

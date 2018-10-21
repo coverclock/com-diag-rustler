@@ -50,6 +50,11 @@ often runs the first time".
 "Rust By Example",
 <https://doc.rust-lang.org/rust-by-example/index.html>
 
+S. Klabnik and C. Nichols, "The Rust Programming Language", No Starch Press,
+2018
+
+J. Blandy and J. Orendorff, "Programming Rust", O'Reilly, 2018
+
 ## Targets
 
 Various versions of this software has at one time or another been installed

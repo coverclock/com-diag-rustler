@@ -64,6 +64,14 @@ Ubuntu 18.04 "bionic"
 Linux 4.15.0    
 rustc 1.29.2 (17a9dc751 2018-10-05)    
 
+## Clone
+
+    cd $HOME
+    mkdir src
+    cd src
+    git clone https://github.com/coverclock/com-diag-rustler
+    cd com-diag-rustler/rustler
+
 ## Build
 
     cargo build

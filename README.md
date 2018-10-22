@@ -44,16 +44,13 @@ often runs the first time".
 
 ## References
 
-"The Rust Programming Langauge",
-<https://doc.rust-lang.org/book/2018-edition/foreword.html>
+S. Klabnik and C. Nichols, "The Rust Programming Language", No Starch Press,
+2018, <https://doc.rust-lang.org/book/2018-edition/foreword.html>
+
+J. Blandy and J. Orendorff, "Programming Rust", O'Reilly, 2018
 
 "Rust By Example",
 <https://doc.rust-lang.org/rust-by-example/index.html>
-
-S. Klabnik and C. Nichols, "The Rust Programming Language", No Starch Press,
-2018
-
-J. Blandy and J. Orendorff, "Programming Rust", O'Reilly, 2018
 
 ## Targets
 

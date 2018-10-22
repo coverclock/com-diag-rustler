@@ -41,13 +41,14 @@ pub mod fletcher {
             
         }
         
-        pub fn init(& mut self) {
-            self.a = 0;
-            self.b = 0;
+        pub fn init(& mut self, a: u8, b: u8) {
+            self.a = a;
+            self.b = b;
         }
         
         pub fn reset(& mut self) {
-            self.init();
+            self.a = 0;
+            self.b = 0;
         }
         
         pub fn checksum(& mut self, buffer: & [u8]) -> u16 {
@@ -56,7 +57,7 @@ pub mod fletcher {
             let mut b: u16 = self.b as u16;
             
             for d in buffer {
-                a = (a + (d as u16)) % 255;
+                a = (a + (*d as u16)) % 255;
                 b = (b + a) % 255;
             }
             

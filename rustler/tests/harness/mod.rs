@@ -8,6 +8,7 @@
 
 extern crate rustler;
 
+use std::os::raw;
 use rustler::ticks::ticks;
 use rustler::throttle::throttle;
 
@@ -31,12 +32,12 @@ fn blocksize(maximum: throttle::Events) -> throttle::Events {
 */
 
 extern {
-    fn rand() -> i32; // <stdlib.h> x86_64 gcc 7.3.0 sizeof(int)==4
+    fn rand() -> raw::c_int; // libc rand(3) <stdlib.h>
 }
     
 pub fn blocksize(maximum: throttle::Events) -> throttle::Events {
     unsafe {
-        let size: throttle::Events = ((rand() % (maximum as i32)) + 1) as throttle::Events;
+        let size: throttle::Events = ((rand() % (maximum as raw::c_int)) + 1) as throttle::Events;
         assert!(size >= 1);
         assert!(size <= maximum);
         return size;

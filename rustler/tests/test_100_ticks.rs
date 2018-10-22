@@ -8,17 +8,24 @@
 
 extern crate rustler;
 
+use std::i64;
 use rustler::ticks::ticks;
 
 #[test]
-fn test_ticks_100_frequency() {
+fn test_ticks_100_ticks() {
+    let ticks: ticks::Ticks = i64::max_value();
+    assert!(ticks == i64::max_value());
+}
+
+#[test]
+fn test_ticks_200_frequency() {
     let frequency: ticks::Ticks = ticks::frequency();
     eprintln!("frequency={}", frequency);
     assert!(frequency == 1000000000);
 }
 
 #[test]
-fn test_ticks_200_now() {
+fn test_ticks_300_now() {
     let before: ticks::Ticks = ticks::now();
     eprintln!("before={}", before);
     ticks::sleep(0);
@@ -28,7 +35,7 @@ fn test_ticks_200_now() {
 }
 
 #[test]
-fn test_ticks_300_sleep() {
+fn test_ticks_400_sleep() {
     let frequency: ticks::Ticks = ticks::frequency();
     let before: ticks::Ticks = ticks::now();
     ticks::sleep(frequency);

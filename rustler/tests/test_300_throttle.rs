@@ -6,10 +6,13 @@
 // mailto:coverclock@diag.com
 // https://github.com/coverclock/com-diag-rustler
 
-#[allow(dead_code)]
+extern crate rustler;
 
-pub mod ticks;
-pub mod fletcher;
-pub mod throttle;
-pub mod gcra;
-pub mod contract;
+use std::i64;
+use rustler::throttle::throttle;
+
+#[test]
+fn test_throttle_100_events() {
+    let events: throttle::Events = i64::max_value();
+    assert!(events == i64::max_value());
+}

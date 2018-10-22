@@ -33,7 +33,8 @@ pub mod gcra {
     impl string::ToString for Gcra {
         
         fn to_string(& self) -> String {
-            format!("Gcra(T={},I={},L={},X={},X1={},F=({},{},{}),E=({},{},{}),A=({},{}))",
+            format!("Gcra@{:p}(t={},i={},l={},x={},x1={},f=({},{},{}),e=({},{},{}),a=({},{}))",
+                self,
                 self.now - self.then,
                 self.increment, self.limit, self.expected, self.deficit,
                 self.full0, self.full1, self.full2,

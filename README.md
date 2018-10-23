@@ -41,11 +41,31 @@ implemented and tested the GCRA in C++, Java, C, Go, and Rust.
 * com-diag-rustler/rustler/src/throttle.rs - Describes the trait for a rate control algorithm.
 * com-diag-rustler/rustler/src/ticks.rs - Implements basic monotonic time functions for use in rate control.
 
+## Executables
+
+* com-diag-rustler/rustler/src/bin/fletch - Computes the Fletcher-16 checksum of a data stream admitted from standard input and emitted to standard output.
+* com-diag-rustler/rustler/src/bin/shape - Shapes the data stream admitted from standard input and emitted to standard output.
+
 ## Remarks
 
 I am reminded of a remark made by a colleage of mine from decades ago about
 the Ada programming language: "If you can get your program to compile, it
 often runs the first time".
+
+A colleague of mine - who has a Ph.D. in physics and worked at Fermi Lab - has
+also been kicking the tires on both Go and Rust. Like me, he also loves Go.
+He remarked that he thought perhaps he wasn't smart enough to use Rust.
+That's the way I feel.
+
+I think Go was designed by some folks who wanted to get some work done,
+and Rust was designed by some folks who thought it would be cool to put on a
+show in the old barn.
+
+I do kinda like Rust's memory management model. Instead of garbage collecting
+in the background like Go (and Java (and Python (and ...))), it uses a
+limited form of reference counting, and restricts how you can use references
+(effectively pointers) so that it can manage the lifetime of variables mostly
+through scope. It's actually pretty clever.
 
 ## Repositories
 

@@ -96,15 +96,15 @@ fn main() {
         };
         burstsize = value as throttle::Events;
     }
-    let jittertolerance: ticks::Ticks = gcra::jittertolerance(peakincrement, burstsize);
-    let bursttolerance: ticks::Ticks = contract::bursttolerance(peakincrement, jittertolerance, sustainedincrement, burstsize);
+    /* let jittertolerance: ticks::Ticks = gcra::jittertolerance(peakincrement, burstsize); */
+    let bursttolerance: ticks::Ticks = contract::bursttolerance(peakincrement, 0 /* jittertolerance */, sustainedincrement, burstsize);
 
     before = ticks::now();
-    shape.init(peakincrement, jittertolerance, sustainedincrement, bursttolerance, before);
+    shape.init(peakincrement, 0 /* jittertolerance */, sustainedincrement, bursttolerance, before);
 
     loop {
         
-        length = match io::stdin().read(& mut buffer) {
+        length = match io::stdin().read(& mut buffer[..(burstsize as usize)]) {
             Ok(0) => break,
             Ok(value) => value,
             Err(ref error) if error.kind() == ErrorKind::Interrupted => continue,

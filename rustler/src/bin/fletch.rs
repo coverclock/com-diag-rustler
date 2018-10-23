@@ -69,7 +69,7 @@ fn main() {
 
     loop {
         
-        length = match io::stdin().read(& mut buffer) {
+        length = match io::stdin().read(& mut buffer[..blocksize]) {
             Ok(0) => break,
             Ok(value) => value,
             Err(ref error) if error.kind() == ErrorKind::Interrupted => continue,

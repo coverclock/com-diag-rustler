@@ -12,7 +12,7 @@ use rustler::fletcher::fletcher;
 
 #[test]
 fn test_fletcher_100_checksum() {
-    let buffer: [u8; 6] = [ b'q', b'w', b'e', b'r', b't', b'y' ];
+    let buffer: [u8; 6] = [ b'q', b'w', b'e', b'r', b't', b'y' ]; // But contrary to documentation, not b"qwerty".
     let mut cs: fletcher::Fletcher = fletcher::Fletcher::new();
     let mut c: u16;
 

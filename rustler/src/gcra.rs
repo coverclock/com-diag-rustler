@@ -30,6 +30,8 @@ pub mod gcra {
         alarmed2:   bool,
     }
     
+    fn btoc(b: bool) -> char { if b { return '1'; } else { return '0'; } }
+    
     impl string::ToString for Gcra {
         
         fn to_string(& self) -> String {
@@ -37,9 +39,9 @@ pub mod gcra {
                 self,
                 self.now - self.then,
                 self.increment, self.limit, self.expected, self.deficit,
-                self.full0, self.full1, self.full2,
-                self.empty0, self.empty1, self.empty2,
-                self.alarmed1, self.alarmed2)
+                btoc(self.full0), btoc(self.full1), btoc(self.full2),
+                btoc(self.empty0), btoc(self.empty1), btoc(self.empty2),
+                btoc(self.alarmed1), btoc(self.alarmed2))
         }
 
     }

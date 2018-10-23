@@ -32,6 +32,15 @@ programming language. I did this in my usual fashion: by porting my "go to"
 learning example, the generic cell rate algorithm. So far, I've successfully
 implemented and tested the GCRA in C++, Java, C, Go, and Rust.
 
+## Modules
+
+* com-diag-rustler/rustler/src/contract.rs - Implements a traffic contract throttle consisting of peak and sustained GCRAs.
+* com-diag-rustler/rustler/src/fletcher.rs - Implements the Fletcher sixteen-bit checksum algorithm.
+* com-diag-rustler/rustler/src/gcra.rs - Implements a Generic Cell Rate Algorithm (GCRA) throttle using a virtual scheduler.
+* com-diag-rustler/rustler/src/harness.rs - Provides at test harness for exercising throttles.
+* com-diag-rustler/rustler/src/throttle.rs - Describes the trait for a rate control algorithm.
+* com-diag-rustler/rustler/src/ticks.rs - Implements basic monotonic time functions for use in rate control.
+
 ## Remarks
 
 I am reminded of a remark made by a colleage of mine from decades ago about
@@ -42,6 +51,25 @@ often runs the first time".
 
 <https://github.com/coverclock/com-diag-rustler>
 
+<https://github.com/coverclock/com-diag-vamoose>
+
+<https://github.com/coverclock/com-diag-diminuto>
+
+<https://github.com/coverclock/com-diag-buckaroo>
+
+<https://github.com/coverclock/com-diag-grandote>
+
+## Articles
+
+C. Overclock, "Traffic Management", 2006-12-25,
+<http://coverclock.blogspot.com/2006/12/traffic-management.html>
+
+C. Overclock, "Rate Control and Throttles", 2007-01-12,
+<http://coverclock.blogspot.com/2007/01/rate-control-and-throttles.html>
+
+C. Overclock, "Traffic Contracts", 2007-01-17,
+<http://coverclock.blogspot.com/2007/01/traffic-contracts.html>
+
 ## References
 
 S. Klabnik and C. Nichols, "The Rust Programming Language", No Starch Press,
@@ -51,6 +79,15 @@ J. Blandy and J. Orendorff, "Programming Rust", O'Reilly, 2018
 
 "Rust By Example",
 <https://doc.rust-lang.org/rust-by-example/index.html>
+
+J. Sloan, "ATM Traffic Management", Digital Aggregates Corporation, 2005-08-29,
+<http://www.diag.com/reports/ATMTrafficManagement.html>
+
+N. Giroux et al., "Traffic Management Specification Version 4.1", ATM Forum,
+af-tm-0121.000, 1999-03
+
+Wikipedia, "Generic cell rate algorithm", 2017-08-23,
+<https://en.wikipedia.org/wiki/Generic_cell_rate_algorithm>
 
 ## Targets
 

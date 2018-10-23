@@ -33,10 +33,10 @@ fn main() {
     let mut length: usize;
     let mut buffer = [0u8; 65536] ; // Does Rust really have no way to allocate a u8 array on the heap at run time?
 
-    let matches = App::new("fletcher")
+    let matches = App::new("fletch")
                           .version("1.0")
                           .author("Chip Overclock <coverclock@diag.com>")
-                          .about("This is a filter that computes a 16-bit Fletcher checksum.")
+                          .about("This filter computes a 16-bit Fletcher checksum on the data stream.")
                           .arg(Arg::with_name("Debug")
                                .short("D")
                                .help("Enable debug output."))

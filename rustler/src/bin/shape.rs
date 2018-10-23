@@ -37,10 +37,10 @@ fn main() {
     let mut delay: ticks::Ticks;
     let mut admissable: bool;
 
-    let matches = App::new("fletcher")
+    let matches = App::new("shape")
                           .version("1.0")
                           .author("Chip Overclock <coverclock@diag.com>")
-                          .about("This is a filter that computes a 16-bit Fletcher checksum.")
+                          .about("This filter shapes the data stream according a traffic contract.")
                           .arg(Arg::with_name("Debug")
                                .short("D")
                                .help("Enable debug output."))

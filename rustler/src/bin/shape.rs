@@ -96,8 +96,7 @@ fn main() {
         };
         burstsize = value as throttle::Events;
     }
-    /* let jittertolerance: ticks::Ticks = gcra::jittertolerance(peakincrement, burstsize); */
-    let bursttolerance: ticks::Ticks = contract::bursttolerance(peakincrement, 0 /* jittertolerance */, sustainedincrement, burstsize);
+    let bursttolerance: ticks::Ticks = contract::bursttolerance(peakincrement, 0, sustainedincrement, burstsize);
 
     before = ticks::now();
     shape.init(peakincrement, 0 /* jittertolerance */, sustainedincrement, bursttolerance, before);
@@ -145,8 +144,16 @@ fn main() {
         count += 1;
         
     }
+
+    now = ticks::now();
+    shape.update(now);
+    
+    delay = shape.get_expected();
+    if debug { eprintln!("Delay: {}s.", (delay as f64) / (frequency as f64)); }
+    ticks::sleep(delay);
     
     after = ticks::now();
+    shape.update(now);
 
     if verbose {
         eprintln!("Total: {}B.", total);

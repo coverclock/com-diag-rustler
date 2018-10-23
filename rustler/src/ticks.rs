@@ -6,6 +6,7 @@
 // mailto:coverclock@diag.com
 // https://github.com/coverclock/com-diag-rustler
 
+/// Basic time-related functions for use in Rustler.
 pub mod ticks {
 
     use std::sync;
@@ -13,15 +14,20 @@ pub mod ticks {
     use std::time;
     use std::thread;
 
+    /// ticks is a type big enough to contain a monotonic elapsed time value.
     pub type Ticks = i64;
 
     static INIT: sync::Once = sync::Once::new();
     static mut EPOCH: option::Option<time::Instant> = option::Option::None;
 
+    /// frequency returns the resolution of the time value that can be stored in a
+    /// Tick in units of cycles per second or Hertz.
     pub fn frequency() -> Ticks {
         1_000_000_000
     }
  
+    /// now returns the current value of Ticks for the monotonically increasing time
+    /// that is now.
     pub fn now() -> Ticks {
         unsafe {
             INIT.call_once(|| { EPOCH = option::Option::Some(time::Instant::now()); } );
@@ -40,6 +46,8 @@ pub mod ticks {
         }
     }
 
+    /// sleep delays the caller for at least as many ticks as specified. If zero
+    /// ticks are specified, the caller yields the processor.
     pub fn sleep(ticks: Ticks) {
         if ticks > 0 {
             let s: Ticks = ticks / frequency();

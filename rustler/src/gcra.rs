@@ -6,6 +6,40 @@
 // mailto:coverclock@diag.com
 // https://github.com/coverclock/com-diag-rustler
 
+/// Implements a Generic Cell Rate Algorithm (GCRA) using a Virtual Scheduler.
+/// This can in turn be used to implement a variety of traffic shaping and rate
+/// control algorithms. The VS works by monitoring the inter-arrival interval of
+/// events and comparing that interval to the expected value. When the cumulative
+/// error in the inter-arrival interval exceeds a threshold, the gcra becomes
+/// "alarmed" and the traffic stream is in violation of its contract. In the
+/// original TM spec, an event was the emission (if traffic shaping) or arrival
+/// (if traffic policing) of an ATM cell, but it could be data blocks, error
+/// reports, or any other kind of real-time activity. In this implementation,
+/// it can even be variable length data blocks, in which the traffic contract
+/// describes the mean bandwidth of the traffic stream, not the instantaneous
+/// bandwidth as with ATM. In the original TM spec, the variable "i" was the
+/// increment or contracted inter-arrival interval, "l" was the limit or
+/// threshold, "x" was the expected inter-arrival interval for the next event,
+/// and "x1" was the inter-arrival deficit accumulated so far. A gcra can
+/// be used to smooth out low frequency events over a long duration, or to
+/// implement a leaky bucket algorithm.
+///
+/// REFERENCES
+///
+/// N. Giroux et al., Traffic Management Specification Version 4.1, ATM Forum,
+/// af-tm-0121.000, 1999-03
+///
+/// C. Overclock, "Traffic Management", 2006-12,
+/// http://coverclock.blogspot.com/2006/12/traffic-management.html
+///
+/// C. Overclock, "Rate Control Using Throttles", 2007-01,
+/// http://coverclock.blogspot.com/2007/01/rate-control-and-throttles.html
+///
+/// C. Overclock, "Traffic Contracts", 2007-01,
+/// http://coverclock.blogspot.com/2007/01/traffic-contracts.html
+///
+/// J. Sloan, "ATM Traffic Management", 2005-08,
+/// http://www.diag.com/reports/ATMTrafficManagement.html
 pub mod gcra {
 
     use std::string;
@@ -14,20 +48,20 @@ pub mod gcra {
     use throttle::throttle;
   
     pub struct Gcra {
-        now:        ticks::Ticks,
-        then:       ticks::Ticks,
-        increment:  ticks::Ticks,
-        limit:      ticks::Ticks,
-        expected:   ticks::Ticks,
-        deficit:    ticks::Ticks,
-        full0:      bool,
-        full1:      bool,
-        full2:      bool,
-        empty0:     bool,
-        empty1:     bool,
-        empty2:     bool,
-        alarmed1:   bool,
-        alarmed2:   bool,
+        now:        ticks::Ticks,         // Current timestamp
+        then:       ticks::Ticks,         // Prior timestamp
+        increment:  ticks::Ticks,         // GCRA i: ticks per event
+        limit:      ticks::Ticks,         // GCRA l: maximum deficit ticks
+        expected:   ticks::Ticks,         // GCRA x: expected ticks until next event
+        deficit:    ticks::Ticks,         // GCRA x1: current deficit ticks
+        full0:      bool,                // The leaky bucket will fill.
+        full1:      bool,                // The leaky bucket is filling.
+        full2:      bool,                // The leaky bucket was filled.
+        empty0:     bool,                // The leaky bucket will empty.
+        empty1:     bool,                // The leaky bucket is emptying.
+        empty2:     bool,                // The leaky bucket was emptied.
+        alarmed1:   bool,                // The gcra is alarmed.
+        alarmed2:   bool,                // The gcra was alarmed.
     }
     
     fn btoc(b: bool) -> char { if b { return '1'; } else { return '0'; } }
@@ -48,6 +82,13 @@ pub mod gcra {
    
     impl throttle::Throttle for Gcra {
         
+        /***************************************************************************
+         * SETTERS
+         **************************************************************************/
+    
+        /// reset a throttle back to its initial state. This is used during construction,
+        /// but can also be used by an application when a calamitous happenstance
+        /// occurs, like the far end disconnecting and reconnecting.
         fn reset(& mut self, now: ticks::Ticks) {
             self.now = now;
             self.then = self.now - self.increment;
@@ -62,45 +103,73 @@ pub mod gcra {
             self.alarmed1 = false;
             self.alarmed2 = false;         
         }
-       
-        /**/
+
+        /***************************************************************************
+         * GETTERS
+         **************************************************************************/
         
+        /// get_expected returns the number of ticks that would be necessary for the
+        /// caller to delay for the event stream  to comply to the traffic contract with
+        /// no limit penalty accumulated given the current state of the throttle. For
+        /// throttles whose implementations differ from that of the Generic Cell Rate
+        /// Algorithm, the value returned may be the same as that returned by Request
+        /// given the current state of the throttle, or some other value entirely.
         fn get_expected(& self) -> ticks::Ticks {
             return self.expected;
         }
         
+        /// is_empty returns true if the throttle is empty, that is, it has no accumulated
+        /// deficit ticks.
         fn is_empty(& self) -> bool {
             return self.empty1;
         }
         
+        /// is_full returns true if the throttle is full, that is, its accumulated deficit
+        /// ticks is greater than or equal to its limit.
         fn is_full(& self) -> bool {
             return self.full1;
         }
         
+        /// is_alarmed returns true if the throttle is alarmed, that is, its accumulated
+        /// deficit ticks is greater than its limit, indicating that the event
+        /// emission stream is out of compliance with the traffic contract.
         fn is_alarmed(& self) -> bool {
             return self.alarmed1;
         }
-        
-        /**/
 
+        /***************************************************************************
+         * SENSORS
+         **************************************************************************/
+    
+        /// emptied returns true if the throttle just emptied in the last action.
         fn emptied(& self) -> bool {
             return self.empty1 && (!self.empty2)
         }
         
+        /// filled returns true if the throttle just filled in the last action.
         fn filled(& self) -> bool {
             return self.full1 && (!self.full2)
         }
         
+        /// alarmed returns true if the throttle just alarmed in the last action.
         fn alarmed(& self) -> bool {
             return self.alarmed1 && (!self.alarmed2);
         }
         
+        /// cleared returns true if the throttle just unalarmed in the last action,
+        /// indicating that the event emission stream has returned to being
+        /// compliant with the traffic contract.
         fn cleared(& self) -> bool {
             return (!self.alarmed1) && self.alarmed2;
         }
-
-        /**/
         
+        /***************************************************************************
+         * MUTATORS
+         **************************************************************************/
+    
+        /// request computes, given the current time in ticks, how long of a delay
+        /// in ticks would be necessary before the next event were emitted for that
+        /// emission to be in compliance with the traffic contract.
         fn request(& mut self, now: ticks::Ticks) -> ticks::Ticks {
             let delay: ticks::Ticks;
             let elapsed: ticks::Ticks;
@@ -128,6 +197,10 @@ pub mod gcra {
             return delay;
         }
         
+        /// commits updates the throttle with the number of events having been emitted
+        /// starting at the time specified in the previous Request, and returns false
+        /// if the throttle is alarmed, indicating the application might want to slow it
+        /// down a bit, true otherwise.
         fn commits(& mut self, events: throttle::Events) -> bool {
             self.then = self.now;
             self.expected = self.deficit;
@@ -154,19 +227,29 @@ pub mod gcra {
             return !self.alarmed1;
         }
             
+        /// commit is equivalent to calling Commits with one event.
         fn commit(& mut self) -> bool {
             self.commits(1)
         }
         
+        /// admits combines calling Request with the current time in ticks with
+        /// calling and returning the value of Commits with the number of events.
         fn admits(& mut self, now: ticks::Ticks, events: throttle::Events) -> bool {
             self.request(now);
             self.commits(events)
         }
         
+        /// admit is equivalent to calling Admits with one event.
         fn admit(& mut self, now: ticks::Ticks) -> bool {
             self.admits(now, 1)
         }
         
+        /// update is equivalent to calling Admits with zero events. It is a way to
+        /// update the throttle with the current time, with no event emission. This
+        /// marks the passage of time during which the emission stream is idle, which
+        /// may bring the throttle back into compliance with the traffic contract (and
+        /// will do so if time has advanced at least as much as the value returned by
+        /// get_expected).
         fn update(& mut self, now: ticks::Ticks) -> bool {
             self.admits(now, 0) 
         }
@@ -177,6 +260,7 @@ pub mod gcra {
 
     impl Gcra {
         
+        /// Allocate a new Gcra object with zero values for all its fields.
         pub fn new() -> Gcra {
             Gcra {
                 now:        0,
@@ -188,14 +272,16 @@ pub mod gcra {
                 full0:      false,
                 full1:      false,
                 full2:      false,
-                empty0:     true,
-                empty1:     true,
-                empty2:     true,
+                empty0:     false,
+                empty1:     false,
+                empty2:     false,
                 alarmed1:   false,
                 alarmed2:   false,
             }
         }
          
+        /// Initialize a Gcra object given an increment and limit in ticks,
+        /// and the current time in ticks since the epoch.
         pub fn init(& mut self, increment: ticks::Ticks, limit: ticks::Ticks, now: ticks::Ticks) {
             self.increment = increment;
             self.limit = limit;
@@ -204,6 +290,8 @@ pub mod gcra {
 
     }
     
+    /// Compute an increment in ticks given the rate specified as the ratio of
+    /// a numerator and a denominator, and the frequency.
     pub fn increment(numerator: throttle::Events, denominator: throttle::Events, frequency: ticks::Ticks) -> ticks::Ticks {
         let mut increment: ticks::Ticks = 0;
         
@@ -242,6 +330,8 @@ pub mod gcra {
         return increment;
     }
     
+    /// Compute a jitter tolerance in ticks given an increment in ticks and a
+    /// burst size in events.
     pub fn jittertolerance(increment: ticks::Ticks, burstsize: throttle::Events) -> ticks::Ticks {
         let mut limit: ticks::Ticks = 0;
         

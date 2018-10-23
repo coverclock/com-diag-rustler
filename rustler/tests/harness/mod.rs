@@ -32,9 +32,11 @@ fn blocksize(maximum: throttle::Events) -> throttle::Events {
 */
 
 extern {
-    fn rand() -> raw::c_int; // libc rand(3) <stdlib.h>
+    /// rand(3) <stdlib.h> libc.
+    fn rand() -> raw::c_int;
 }
-    
+
+/// Compute a random blocksize between the values 1 and maximum inclusive.
 pub fn blocksize(maximum: throttle::Events) -> throttle::Events {
     unsafe {
         let size: throttle::Events = ((rand() % (maximum as raw::c_int)) + 1) as throttle::Events;
@@ -44,6 +46,8 @@ pub fn blocksize(maximum: throttle::Events) -> throttle::Events {
     }
 }
 
+/// Simulate a data stream through a shaping throttle and a policing throttle
+/// given a maximum blocksize value and a limit on iterations.
 pub fn simulate(shape: & mut throttle::Throttle, police: & mut throttle::Throttle, maximum: throttle::Events, iterations: throttle::Events) {
     let frequency: f64 = ticks::frequency() as f64;
     let mut delay: ticks::Ticks;

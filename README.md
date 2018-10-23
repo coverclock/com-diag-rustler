@@ -121,5 +121,7 @@ rustc 1.29.2 (17a9dc751 2018-10-05)
 
 ## Functional Tests
 
+    dd if=/dev/urandom count=1000 | ./target/debug/fletch -V -b 512 | ./target/debug/shape -V -p 2048 -s 1024 -b 512 | ./target/debug/fletch -V -b 512 > /dev/null
+
 ## Notes
 

@@ -10,6 +10,8 @@ extern crate clap;
 extern crate rustler;
 
 use std::io;
+use std::io::Read;
+use std::io::Write;
 use std::io::ErrorKind;
 use clap::Arg;
 use clap::App;
@@ -18,18 +20,18 @@ use rustler::fletcher::fletcher;
 
 fn main() {
     let frequency: f64 = ticks::frequency() as f64;
+    let before: ticks::Ticks;
+    let after: ticks::Ticks;
     let mut cs: fletcher::Fletcher = fletcher::Fletcher::new();
     let mut total: usize = 0;
     let mut peak: f64 = 0.0;
     let mut count: usize = 0;
-    let mut then: ticks::Ticks = 0;
-    let mut now: ticks::Ticks;
-    let mut before: ticks::Ticks;
-    let mut after: ticks::Ticks;
+    let mut now: ticks::Ticks = 0;
+    let mut c: u16 = 0;
+    let mut then: ticks::Ticks;
     let mut rate: f64;
     let mut length: usize;
-    let mut c: u16;
-    let mut buffer: [u8; 0xffff]; // Does Rust really have no way to allocate a u8 array on the heap at run time?
+    let mut buffer = [0u8; 65536] ; // Does Rust really have no way to allocate a u8 array on the heap at run time?
 
     let matches = App::new("fletcher")
                           .version("1.0")
@@ -53,8 +55,11 @@ fn main() {
     if matches.is_present("blocksize") {
         size = match usize::from_str_radix(matches.value_of("blocksize").unwrap(), 10) {
             Ok(value) => value,
-            Err(error) => size,
+            Err(_) => 0,
         }
+    }
+    if !((0 < size) && (size <= 65536)) {
+        panic!("blocksize not valid!");
     }
 
     before = ticks::now();
@@ -63,9 +68,9 @@ fn main() {
         
         length = match io::stdin().read(& mut buffer) {
             Ok(0) => break,
-            Ok(bytes) => bytes,
+            Ok(value) => value,
             Err(ref error) if error.kind() == ErrorKind::Interrupted => continue,
-            Err(error) => break,     
+            Err(_) => break,     
         };
         if debug { eprintln!("Read: {}", length); }
 
@@ -88,8 +93,8 @@ fn main() {
         }
 
         match io::stdout().write_all(&buffer[..length]) {
-            Ok(()) => { },
-            Err(error) => break,
+            Ok(_) => { },
+            Err(_) => break,
         }
         if debug { eprintln!("Written: {}", length); }
 

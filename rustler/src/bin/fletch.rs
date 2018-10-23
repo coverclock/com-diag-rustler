@@ -17,19 +17,19 @@ use rustler::ticks::ticks;
 use rustler::fletcher::fletcher;
 
 fn main() {
-    let cs: fletcher::Fletcher = fletcher::Fletcher::new();
     let frequency: f64 = ticks::frequency() as f64;
+    let mut cs: fletcher::Fletcher = fletcher::Fletcher::new();
     let mut total: usize = 0;
     let mut peak: f64 = 0.0;
-    let count: usize = 0;
+    let mut count: usize = 0;
     let mut then: ticks::Ticks = 0;
     let mut now: ticks::Ticks;
     let mut before: ticks::Ticks;
     let mut after: ticks::Ticks;
     let mut rate: f64;
-    let c: u16;
+    let mut length: usize;
+    let mut c: u16;
     let mut buffer: [u8; 0xffff]; // Does Rust really have no way to allocate a u8 array on the heap at run time?
-    let size: usize = 512;
 
     let matches = App::new("fletcher")
                           .version("1.0")
@@ -49,6 +49,7 @@ fn main() {
                           .get_matches();
     let debug: bool = matches.is_present("Debug");
     let verbose: bool = matches.is_present("Verbose");
+    let mut size: usize = 512;
     if matches.is_present("blocksize") {
         size = match usize::from_str_radix(matches.value_of("blocksize").unwrap(), 10) {
             Ok(value) => value,
@@ -60,7 +61,7 @@ fn main() {
 
     loop {
         
-        let length = match io::stdin().read(& mut buffer) {
+        length = match io::stdin().read(& mut buffer) {
             Ok(0) => break,
             Ok(bytes) => bytes,
             Err(ref error) if error.kind() == ErrorKind::Interrupted => continue,
@@ -86,7 +87,10 @@ fn main() {
             }
         }
 
-        io::stdout().write_all(&buffer[..length]);
+        match io::stdout().write_all(&buffer[..length]) {
+            Ok(()) => { },
+            Err(error) => break,
+        }
         if debug { eprintln!("Written: {}", length); }
 
         total += length as usize;

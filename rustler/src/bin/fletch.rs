@@ -49,16 +49,19 @@ fn main() {
                                .takes_value(true)
                                .value_name("BYTES"))
                           .get_matches();
+
     let debug: bool = matches.is_present("Debug");
+
     let verbose: bool = matches.is_present("Verbose");
-    let mut size: usize = 512;
+
+    let mut blocksize: usize = 1;
     if matches.is_present("blocksize") {
-        size = match usize::from_str_radix(matches.value_of("blocksize").unwrap(), 10) {
+        blocksize = match usize::from_str_radix(matches.value_of("blocksize").unwrap(), 10) {
             Ok(value) => value,
             Err(_) => 0,
         }
     }
-    if !((0 < size) && (size <= 65536)) {
+    if !((0 < blocksize) && (blocksize <= 65536)) {
         panic!("blocksize not valid!");
     }
 

@@ -145,3 +145,23 @@ rustc 1.29.2 (17a9dc751 2018-10-05)
 
 ## Notes
 
+Here is a cut and paste of the output of the functional test.
+
+    $ dd if=/dev/urandom count=1000 | ./target/debug/fletch -V -b 512 | ./target/debug/shape -V -p 2048 -s 1024 -b 512 | ./target/debug/fletch -V -b 512 > /dev/null
+    1000+0 records in
+    1000+0 records out
+    512000 bytes (512 kB, 500 KiB) copied, 364.751 s, 1.4 kB/s
+    Total: 512000B.
+    Average: 512B/io.
+    Peak: 23629315.119069595Bps.
+    Sustained: 1172.2962375287586Bps.
+    Checksum: 0x95c5.
+    Total: 512000B.
+    Average: 511.4885114885115B/io.
+    Peak: 2042.8253028826655Bps.
+    Sustained: 1024.5163674246066Bps.
+    Total: 512000B.
+    Average: 353.1034482758621B/io.
+    Peak: 19942866.382795237Bps.
+    Sustained: 1024.5146443326892Bps.
+    Checksum: 0x95c5.

@@ -140,6 +140,8 @@ rustc 1.29.2 (17a9dc751 2018-10-05)
     cd ${HOME}/src/com-diag-rustler/rustler
     dd if=/dev/urandom count=1000 | ./target/debug/fletch -V -b 512 | ./target/debug/shape -V -p 2048 -s 1024 -b 512 | ./target/debug/fletch -V -b 512 > /dev/null
 
+Valgrind works just fine with Rust, unlike my experience with Go.
+
     cd ${HOME}/src/com-diag-rustler/rustler
     dd if=/dev/urandom count=1000 > DATA
     valgrind ./target/debug/fletch -V -b 512 < DATA > /dev/null

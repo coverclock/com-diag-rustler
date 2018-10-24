@@ -48,19 +48,6 @@ implemented and tested the GCRA in C++, Java, C, Go, and Rust.
 
 ## Remarks
 
-I am reminded of a remark made by a colleage of mine from decades ago about
-the Ada programming language: "If you can get your program to compile, it
-often runs the first time".
-
-A colleague of mine - who has a Ph.D. in physics and worked at Fermi Lab - has
-also been kicking the tires on both Go and Rust. Like me, he also loves Go.
-He remarked that he thought perhaps he wasn't smart enough to use Rust.
-That's the way I feel.
-
-I think Go was designed by some folks who wanted to get some work done,
-and Rust was designed by some folks who thought it would be cool to put on a
-show in the old barn.
-
 I do kinda like Rust's memory management model. Instead of garbage collecting
 in the background like Go (and Java (and Python (and ...))), it uses a
 limited form of reference counting, and restricts how you can use references

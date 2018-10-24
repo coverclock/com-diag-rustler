@@ -110,6 +110,14 @@ Ubuntu 18.04 "bionic"
 Linux 4.15.0    
 rustc 1.29.2 (17a9dc751 2018-10-05)    
 
+"Gold"    
+Raspberry Pi 3B+    
+ARM ARMv7 64-bit    
+Broadcom BCM2837B0 Cortex-A53 @ 1.4GHz x 4      
+Raspbian 9.4 "stretch"    
+Linux 4.14.34    
+rustc 1.29.2 (17a9dc751 2018-10-05)    
+
 ## Clone
 
     mkdir -p ${HOME}/src
@@ -142,20 +150,21 @@ rustc 1.29.2 (17a9dc751 2018-10-05)
 Here is a cut and paste of the output of one of the functional tests.
 
     $ dd if=/dev/urandom count=1000 | ./target/debug/fletch -V -b 512 | ./target/debug/shape -V -p 2048 -s 1024 -b 512 | ./target/debug/fletch -V -b 512 > /dev/null
+    Contract: Contract@0x7e90e8f8[112]:{p:Gcra@0x7e90e8f8[56]:{t:488282,i:488282,l:0,x:0,x1:0,f:{0,0,0},e:{1,1,1},a:{0,0}},s:Gcra@0x7e90e930[56]:{t:976563,i:976563,l:249511591,x:0,x1:0,f:{0,0,0},e:{1,1,1},a:{0,0}}}
     1000+0 records in
     1000+0 records out
-    512000 bytes (512 kB, 500 KiB) copied, 368.745 s, 1.4 kB/s
+    512000 bytes (512 kB, 500 KiB) copied, 362.642 s, 1.4 kB/s
     Total: 512000B.
     Average: 512B/io.
-    Peak: 17158176.943699732Bps.
-    Sustained: 1161.6722793753877Bps.
-    Checksum: 0xa118.
+    Peak: 2310865.5816430617Bps.
+    Sustained: 1156.6953908527787Bps.
+    Checksum: 0x9c87.
     Total: 512000B.
     Average: 511.4885114885115B/io.
-    Peak: 2042.7237507733873Bps.
-    Sustained: 1023.9991574043413Bps.
+    Peak: 2043.1268645627642Bps.
+    Sustained: 1023.993400802849Bps.
     Total: 512000B.
-    Average: 357.2923935799023B/io.
-    Peak: 19327845.741052344Bps.
-    Sustained: 1023.9978929031518Bps.
-    Checksum: 0xa118.
+    Average: 355.0624133148405B/io.
+    Peak: 4913958.297759311Bps.
+    Sustained: 1023.9944224969396Bps.
+    Checksum: 0x9c87.

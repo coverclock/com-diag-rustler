@@ -38,7 +38,7 @@ pub mod fletcher {
             c <<= 8;
             c |= self.a as u16;
 
-            format!("Fletcher@{:p}(a=0x{:02x},b=0x{:02x},c=0x{:04x})",
+            format!("Fletcher@{:p}:{{a:0x{:02x},b:0x{:02x},c:0x{:04x}}}",
                 self, self.a, self.b, c)
         }
 

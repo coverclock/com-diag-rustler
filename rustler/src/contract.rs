@@ -50,7 +50,7 @@ pub mod contract {
     impl string::ToString for Contract {
         
         fn to_string(& self) -> String {
-            format!("Contract@{:p}(p={},s={})",
+            format!("Contract@{:p}:{{p:{},s:{}}}",
                 self,
                 self.peak.to_string(),
                 self.sustained.to_string())

@@ -1,6 +1,6 @@
 # com-diag-rustler
 
-Musings with the Rust programming language.
+This is an implementation of the Generic Cell Rate Algorithm in the Rust programming language.
 
 ## Copyright
 
@@ -125,27 +125,30 @@ rustc 1.29.2 (17a9dc751 2018-10-05)
 
 ## Clone
 
-    cd $HOME
-    mkdir src
-    cd src
+    mkdir -p ${HOME}/src
+    cd ${HOME}/src
     git clone https://github.com/coverclock/com-diag-rustler
     cd com-diag-rustler/rustler
 
 ## Build
 
+    cd ${HOME}/src/com-diag-rustler/rustler
     cargo build
 
 ## Unit Tests
 
+    cd ${HOME}/src/com-diag-rustler/rustler
     cargo test -- --nocapture --test-threads=1
 
 ## Functional Tests
 
+    cd ${HOME}/src/com-diag-rustler/rustler
     dd if=/dev/urandom count=1000 | ./target/debug/fletch -V -b 512 | ./target/debug/shape -V -p 2048 -s 1024 -b 512 | ./target/debug/fletch -V -b 512 > /dev/null
 
+    cd ${HOME}/src/com-diag-rustler/rustler
     dd if=/dev/urandom count=1000 > DATA
     valgrind ./target/debug/fletch -V -b 512 < DATA > /dev/null
-    valgrind ./target/debug/shape -V -p 2048 -s 1024 -b 512 < DATA > /dev/nul
+    valgrind ./target/debug/shape -V -p 2048 -s 1024 -b 512 < DATA > /dev/null
 
 ## Notes
 

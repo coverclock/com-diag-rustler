@@ -100,6 +100,8 @@ fn main() {
 
     before = ticks::now();
     shape.init(peakincrement, 0 /* jittertolerance */, sustainedincrement, bursttolerance, before);
+    
+    if verbose { eprintln!("Contract: {}", shape.to_string()) }
 
     loop {
         

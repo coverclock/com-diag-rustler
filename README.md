@@ -87,6 +87,9 @@ J. Blandy and J. Orendorff, "Programming Rust", O'Reilly, 2018
 "Rust By Example",
 <https://doc.rust-lang.org/rust-by-example/index.html>
 
+"The Rust Standard Library",
+<https://doc.rust-lang.org/stable/std/>
+
 J. Sloan, "ATM Traffic Management", Digital Aggregates Corporation, 2005-08-29,
 <http://www.diag.com/reports/ATMTrafficManagement.html>
 

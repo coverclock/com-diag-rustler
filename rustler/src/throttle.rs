@@ -10,6 +10,9 @@
 /// Throttle. Throttles are mechanisms that shape event emission rates or
 /// police event admission rates. Frequently, throttles are implemented using
 /// a virtual scheduler or a leaky bucket.
+///
+/// This module is based on the Go implementation in the Vamoose repository.
+///
 pub mod throttle {
 
     use ticks::ticks;

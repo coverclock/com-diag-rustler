@@ -143,9 +143,13 @@ rustc 1.29.2 (17a9dc751 2018-10-05)
 
     dd if=/dev/urandom count=1000 | ./target/debug/fletch -V -b 512 | ./target/debug/shape -V -p 2048 -s 1024 -b 512 | ./target/debug/fletch -V -b 512 > /dev/null
 
+    dd if=/dev/urandom count=1000 > DATA
+    valgrind ./target/debug/fletch -V -b 512 < DATA > /dev/null
+    valgrind ./target/debug/shape -V -p 2048 -s 1024 -b 512 < DATA > /dev/nul
+
 ## Notes
 
-Here is a cut and paste of the output of the functional test.
+Here is a cut and paste of the output of one of the functional tests.
 
     $ dd if=/dev/urandom count=1000 | ./target/debug/fletch -V -b 512 | ./target/debug/shape -V -p 2048 -s 1024 -b 512 | ./target/debug/fletch -V -b 512 > /dev/null
     1000+0 records in

@@ -16,6 +16,8 @@
 /// the sustained increment, and the sustained limit computed from maximum burst
 /// size and the jitter tolerance.
 ///
+/// This module is based on the Go implementation in the Vamoose repository.
+///
 /// REFERENCES
 ///
 /// N. Giroux et al., Traffic Management Specification Version 4.1, ATM Forum,
@@ -32,6 +34,7 @@
 ///
 /// J. Sloan, "ATM Traffic Management", 2005-08,
 /// http://www.diag.com/reports/ATMTrafficManagement.html
+///
 pub mod contract {
 
     use std::string;

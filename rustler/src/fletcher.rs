@@ -19,6 +19,7 @@
 /// J. Fletcher, "An Arithmetic Checksum for Serial Transmissions",
 /// IEEE Transactions on Communication, COM-30, No. 1, pp. 247-252,
 /// January 1982
+///
 pub mod fletcher {
 
     use std::string;

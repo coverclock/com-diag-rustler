@@ -24,6 +24,8 @@
 /// be used to smooth out low frequency events over a long duration, or to
 /// implement a leaky bucket algorithm.
 ///
+/// This module is based on the Go implementation in the Vamoose repository.
+///
 /// REFERENCES
 ///
 /// N. Giroux et al., Traffic Management Specification Version 4.1, ATM Forum,
@@ -40,6 +42,7 @@
 ///
 /// J. Sloan, "ATM Traffic Management", 2005-08,
 /// http://www.diag.com/reports/ATMTrafficManagement.html
+///
 pub mod gcra {
 
     use std::string;

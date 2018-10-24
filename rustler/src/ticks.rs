@@ -7,6 +7,7 @@
 // https://github.com/coverclock/com-diag-rustler
 
 /// Basic time-related functions for use in Rustler.
+///
 pub mod ticks {
 
     use std::sync;
@@ -19,11 +20,13 @@ pub mod ticks {
 
     static INIT: sync::Once = sync::Once::new();
     static mut EPOCH: option::Option<time::Instant> = option::Option::None;
+    
+    pub const FREQUENCY: Ticks = 1_000_000_000;
 
     /// frequency returns the resolution of the time value that can be stored in a
     /// Tick in units of cycles per second or Hertz.
     pub fn frequency() -> Ticks {
-        1_000_000_000
+        FREQUENCY
     }
  
     /// now returns the current value of Ticks for the monotonically increasing time

@@ -38,6 +38,7 @@
 pub mod contract {
 
     use std::string;
+    use std::mem;
     use ticks::ticks;
     use throttle::throttle;
     use gcra::gcra;
@@ -46,12 +47,14 @@ pub mod contract {
         peak:       gcra::Gcra,
         sustained:  gcra::Gcra,
     }
+
+    pub static CONTRACT: usize = mem::size_of::<Contract>();
     
     impl string::ToString for Contract {
         
         fn to_string(& self) -> String {
-            format!("Contract@{:p}:{{p:{},s:{}}}",
-                self,
+            format!("Contract@{:p}[{}]:{{p:{},s:{}}}",
+                self, CONTRACT,
                 self.peak.to_string(),
                 self.sustained.to_string())
         }

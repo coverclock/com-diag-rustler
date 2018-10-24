@@ -46,6 +46,7 @@
 pub mod gcra {
 
     use std::string;
+    use std::mem;
     use std::i64;
     use ticks::ticks;
     use throttle::throttle;
@@ -66,14 +67,16 @@ pub mod gcra {
         alarmed1:   bool,                // The gcra is alarmed.
         alarmed2:   bool,                // The gcra was alarmed.
     }
+
+    pub static GCRA: usize = mem::size_of::<Gcra>();
     
     fn btoc(b: bool) -> char { if b { return '1'; } else { return '0'; } }
     
     impl string::ToString for Gcra {
         
         fn to_string(& self) -> String {
-            format!("Gcra@{:p}:{{t:{},i:{},l:{},x:{},x1:{},f:{{{},{},{}}},e:{{{},{},{}}},a:{{{},{}}}}}",
-                self,
+            format!("Gcra@{:p}[{}]:{{t:{},i:{},l:{},x:{},x1:{},f:{{{},{},{}}},e:{{{},{},{}}},a:{{{},{}}}}}",
+                self, GCRA,
                 self.now - self.then,
                 self.increment, self.limit, self.expected, self.deficit,
                 btoc(self.full0), btoc(self.full1), btoc(self.full2),

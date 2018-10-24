@@ -1,6 +1,6 @@
 [package]
 name = "rustler"
-version = "1.0.0"
+version = "1.1.0"
 authors = ["Chip Overclock <coverclock@diag.com>"]
 
 [dependencies]

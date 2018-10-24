@@ -23,11 +23,14 @@
 pub mod fletcher {
 
     use std::string;
+    use std::mem;
   
     pub struct Fletcher {
         a:          u8,
         b:          u8,
     }
+
+    pub static FLETCHER: usize = mem::size_of::<Fletcher>();
     
     impl string::ToString for Fletcher {
         
@@ -38,8 +41,9 @@ pub mod fletcher {
             c <<= 8;
             c |= self.a as u16;
 
-            format!("Fletcher@{:p}:{{a:0x{:02x},b:0x{:02x},c:0x{:04x}}}",
-                self, self.a, self.b, c)
+            format!("Fletcher@{:p}[{}]:{{a:0x{:02x},b:0x{:02x},c:0x{:04x}}}",
+                self, FLETCHER,
+                self.a, self.b, c)
         }
 
     }

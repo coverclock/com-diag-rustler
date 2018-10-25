@@ -33,7 +33,7 @@ fn main() {
     let mut then: ticks::Ticks;
     let mut rate: f64;
     let mut length: usize;
-    let mut buffer = [0u8; 65536] ; // Does Rust really have no way to allocate a u8 array on the heap at run time?
+    let mut buffer = [0u8; 65536] ; // Does Rust really have no way to allocate a u8 array on the heap sized at run time?
     let mut delay: ticks::Ticks;
     let mut admissable: bool;
 

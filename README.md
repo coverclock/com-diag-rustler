@@ -48,11 +48,18 @@ implemented and tested the GCRA in C++, Java, C, Go, and Rust.
 
 ## Remarks
 
-I do kinda like Rust's memory management model. Instead of garbage collecting
+I think my main issue with Rust was how under-documented it is. And because
+it’s new-ish and a moving target, much of what is documented is subtly wrong.
+This made the learning experience especially painful and often a matter of
+laborious reverse engineering or trial and error. And unlike Go, I didn’t
+find using Rust intuitive; for me, it was difficult to predict its
+syntax and semantics. But there is much to admire about Rust.
+
+I especially like Rust's memory management model. Instead of garbage collecting
 in the background like Go (and Java (and Python (and ...))), it uses a
 limited form of reference counting, and restricts how you can use references
 (effectively pointers) so that it can manage the lifetime of variables mostly
-through scope. It's actually pretty clever.
+through scope. It's pretty clever.
 
 ## Repositories
 
@@ -105,7 +112,7 @@ Various versions of this software has at one time or another been installed
 and tested with the following combinations of hardware and software. Your
 mileage may vary.
 
-"Nickel"
+"Nickel"    
 Intel NUC5i7RYH    
 Intel x86_64 64-bit    
 Intel Core i7-5557U @ 3.10GHz x 2 x 2    

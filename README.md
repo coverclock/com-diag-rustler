@@ -34,17 +34,17 @@ implemented and tested the GCRA in C++, Java, C, Go, and Rust.
 
 ## Modules
 
-* com-diag-rustler/rustler/src/contract.rs - Implements a traffic contract throttle consisting of peak and sustained GCRAs.
-* com-diag-rustler/rustler/src/fletcher.rs - Implements the Fletcher sixteen-bit checksum algorithm.
-* com-diag-rustler/rustler/src/gcra.rs - Implements a Generic Cell Rate Algorithm (GCRA) throttle using a virtual scheduler.
-* com-diag-rustler/rustler/src/harness.rs - Provides at test harness for exercising throttles.
-* com-diag-rustler/rustler/src/throttle.rs - Describes the trait for a rate control algorithm.
-* com-diag-rustler/rustler/src/ticks.rs - Implements basic monotonic time functions for use in rate control.
+* com-diag-rustler/Rustler/src/contract.rs - Implements a traffic contract throttle consisting of peak and sustained GCRAs.
+* com-diag-rustler/Rustler/src/fletcher.rs - Implements the Fletcher sixteen-bit checksum algorithm.
+* com-diag-rustler/Rustler/src/gcra.rs - Implements a Generic Cell Rate Algorithm (GCRA) throttle using a virtual scheduler.
+* com-diag-rustler/Rustler/src/harness.rs - Provides at test harness for exercising throttles.
+* com-diag-rustler/Rustler/src/throttle.rs - Describes the trait for a rate control algorithm.
+* com-diag-rustler/Rustler/src/ticks.rs - Implements basic monotonic time functions for use in rate control.
 
 ## Executables
 
-* com-diag-rustler/rustler/src/bin/fletch - Computes the Fletcher-16 checksum of a data stream admitted from standard input and emitted to standard output.
-* com-diag-rustler/rustler/src/bin/shape - Shapes the data stream admitted from standard input and emitted to standard output.
+* com-diag-rustler/Rustler/src/bin/fletch - Computes the Fletcher-16 checksum of a data stream admitted from standard input and emitted to standard output.
+* com-diag-rustler/Rustler/src/bin/shape - Shapes the data stream admitted from standard input and emitted to standard output.
 
 ## Remarks
 
@@ -133,26 +133,26 @@ rustc 1.29.2 (17a9dc751 2018-10-05)
     mkdir -p ${HOME}/src
     cd ${HOME}/src
     git clone https://github.com/coverclock/com-diag-rustler
-    cd com-diag-rustler/rustler
+    cd com-diag-rustler/Rustler
 
 ## Build
 
-    cd ${HOME}/src/com-diag-rustler/rustler
+    cd ${HOME}/src/com-diag-rustler/Rustler
     cargo build
 
 ## Unit Tests
 
-    cd ${HOME}/src/com-diag-rustler/rustler
+    cd ${HOME}/src/com-diag-rustler/Rustler
     cargo test -- --nocapture --test-threads=1
 
 ## Functional Tests
 
-    cd ${HOME}/src/com-diag-rustler/rustler
+    cd ${HOME}/src/com-diag-rustler/Rustler
     dd if=/dev/urandom count=1000 | ./target/debug/fletch -V -b 512 | ./target/debug/shape -V -p 2048 -s 1024 -b 512 | ./target/debug/fletch -V -b 512 > /dev/null
 
 Valgrind works just fine with Rust, unlike my experience with Go.
 
-    cd ${HOME}/src/com-diag-rustler/rustler
+    cd ${HOME}/src/com-diag-rustler/Rustler
     dd if=/dev/urandom count=1000 > DATA
     valgrind ./target/debug/fletch -V -b 512 < DATA > /dev/null
     valgrind ./target/debug/shape -V -p 2048 -s 1024 -b 512 < DATA > /dev/null

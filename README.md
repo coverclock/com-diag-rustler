@@ -61,6 +61,11 @@ limited form of reference counting, and restricts how you can use references
 (effectively pointers) so that it can manage the lifetime of variables mostly
 through scope. It's pretty clever.
 
+I also appreciate how trivial it was to call a C function from libc using
+Rust. Since most stuff I work on entails integrating with some legacy
+framework or library (typically to manage some custom hardware), this is
+an important feature.
+
 ## Repositories
 
 <https://github.com/coverclock/com-diag-rustler>

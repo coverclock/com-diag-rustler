@@ -48,6 +48,10 @@ implemented and tested the GCRA in C++, Java, C, Go, and Rust.
 
 ## Remarks
 
+My experience writing in Rust reminds me of a comment a colleage of mine made
+decades ago about the Ada programming language: "If you can just get your
+program to compile, it frequently works the first time."
+
 I think my main issue with Rust was how under-documented it is. And because
 it’s new-ish and a moving target, much of what is documented is subtly wrong.
 This made the learning experience especially painful and often a matter of

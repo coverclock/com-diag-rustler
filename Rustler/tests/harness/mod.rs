@@ -9,10 +9,13 @@
 extern crate rustler;
 
 use std::os::raw;
+use std::sync;
 use std::sync::mpsc;
 use std::net;
+use std::thread;
 use rustler::ticks::ticks;
 use rustler::throttle::throttle;
+use rustler::fletcher::fletcher;
 
 /*******************************************************************************
  * SIMULATED EVENT STREAM
@@ -115,29 +118,70 @@ pub fn simulate(shape: & mut throttle::Throttle, police: & mut throttle::Throttl
     let mean: f64 = seconds / (iterations as f64);
     let sustained: f64 = (total as f64) * frequency / (duration as f64);
 
-    println!("simulate: total={}B mean={}B/io maximum={}B/io latency={}s/io peak={}B/s sustained={}B/s", total, average, maximum, mean, peak, sustained);
+    println!("simulate: total={}B mean={}B/io maximum={}B/io latency={}s/io peak={}B/s sustained={}B/s.", total, average, maximum, mean, peak, sustained);
 }
 
 /*******************************************************************************
  * ACTUAL EVENT STREAM
  ******************************************************************************/
 
-fn producer(limit: u64, output: & mut mpsc::SyncSender<u8>, total: & mut u64, checksum: & mut u16, done: & mut mpsc::Sender<bool>) {
+fn producer(limit: usize, output: & mut mpsc::SyncSender<u8>, total: & mut usize, checksum: & mut u16) {
+    let mut buffer = [0u8; 65536];
     
 }
 
-fn shaper(input: & mut mpsc::Receiver<u8>, shape: & mut throttle::Throttle, output: & mut net::UdpSocket, address: & net::SocketAddr, done: & mut mpsc::Sender<bool>) {
+fn shaper(input: & mut mpsc::Receiver<u8>, shape: & mut throttle::Throttle, output: & mut net::UdpSocket, address: & net::SocketAddrV4) {
+    let mut buffer = [0u8; 65536];
     
 }
 
-fn policer(limit: u64, input: & mut net::UdpSocket, police: & mut throttle::Throttle, output: & mut mpsc::SyncSender<u8>, done: & mut mpsc::Sender<bool>) {
+fn policer(input: & mut net::UdpSocket, police: & mut throttle::Throttle, output: & mut mpsc::SyncSender<u8>) {
+    let mut buffer = [0u8; 65536];
     
 }
 
-fn consumer(input: & mut mpsc::Receiver<u8>, total: & mut u64, checksum: & mut u16, done: & mut mpsc::Sender<bool>) {
+fn consumer(input: & mut mpsc::Receiver<u8>, total: & mut usize, checksum: & mut u16) {
+    let mut buffer = [0u8; 65536];
     
 }
 
-pub fn actualize(shape: & mut throttle::Throttle, police: & mut throttle::Throttle, maximum: throttle::Events, iterations: throttle::Events) {
+pub fn actualate(shape: & mut throttle::Throttle, police: & mut throttle::Throttle, maximum: usize, total: usize) {
+    let mut producertotal: usize = 1;
+    let mut producerchecksum: u16 = 2;
+    let mut consumertotal: usize = 3;
+    let mut consumerchecksum: u16 = 4;
+    
+    eprintln!("actualate: Beginning.");
+
+    let (supply_tx, supply_rx) = mpsc::sync_channel::<u8>(maximum);
+    let (demand_tx, demand_rx) = mpsc::sync_channel::<u8>(maximum);
+    
+    let source = net::UdpSocket::bind("127.0.0.1:5555").expect("couldn't bind to address");
+    let sink = net::UdpSocket::bind("127.0.0.1:0").expect("couldn't bind to address");
+    let destination = net::SocketAddrV4::new(net::Ipv4Addr::new(127, 0, 0, 1), 5555);
+    
+    eprintln!("actualate: Beginning.");
+    
+    let consuming = thread::spawn( move || { consumer(& mut demand_rx, & mut consumertotal, & mut consumerchecksum); } );
+    let policing  = thread::spawn( move || { policer(& mut source, police, & mut demand_tx); } );
+    let shaping   = thread::spawn( move || { shaper(& mut supply_rx, shape, & mut sink, & destination); } );
+    let producing = thread::spawn( move || { producer(total, & mut supply_tx, & mut producertotal, & mut producerchecksum); } );
+    
+    eprintln!("actualate: Waiting.");
+   
+    let consumed = consuming.join();
+    let policed = policing.join();
+    let shaped = shaping.join();
+    let produced = producing.join();
+
+    eprintln!("actualate: Checking.");
+    
+    eprintln!("actualate: produced={}:{:04x}", producertotal, producerchecksum);
+    eprintln!("actualate: consumer={}:{:04x}", consumertotal, consumerchecksum);
+
+    assert!(consumertotal == producertotal);
+    assert!(consumerchecksum == producerchecksum);
+    
+    eprintln!("actualate: Ending.");
 
 }

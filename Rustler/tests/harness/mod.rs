@@ -9,8 +9,14 @@
 extern crate rustler;
 
 use std::os::raw;
+use std::sync::mpsc;
+use std::net;
 use rustler::ticks::ticks;
 use rustler::throttle::throttle;
+
+/*******************************************************************************
+ * SIMULATED EVENT STREAM
+ ******************************************************************************/
 
 /*
 fn blocksize(maximum: throttle::Events) -> throttle::Events {
@@ -110,4 +116,28 @@ pub fn simulate(shape: & mut throttle::Throttle, police: & mut throttle::Throttl
     let sustained: f64 = (total as f64) * frequency / (duration as f64);
 
     println!("simulate: total={}B mean={}B/io maximum={}B/io latency={}s/io peak={}B/s sustained={}B/s", total, average, maximum, mean, peak, sustained);
+}
+
+/*******************************************************************************
+ * ACTUAL EVENT STREAM
+ ******************************************************************************/
+
+fn producer(limit: u64, output: & mut mpsc::SyncSender<u8>, total: & mut u64, checksum: & mut u16, done: & mut mpsc::Sender<bool>) {
+    
+}
+
+fn shaper(input: & mut mpsc::Receiver<u8>, shape: & mut throttle::Throttle, output: & mut net::UdpSocket, address: & net::SocketAddr, done: & mut mpsc::Sender<bool>) {
+    
+}
+
+fn policer(limit: u64, input: & mut net::UdpSocket, police: & mut throttle::Throttle, output: & mut mpsc::SyncSender<u8>, done: & mut mpsc::Sender<bool>) {
+    
+}
+
+fn consumer(input: & mut mpsc::Receiver<u8>, total: & mut u64, checksum: & mut u16, done: & mut mpsc::Sender<bool>) {
+    
+}
+
+pub fn actualize(shape: & mut throttle::Throttle, police: & mut throttle::Throttle, maximum: throttle::Events, iterations: throttle::Events) {
+
 }

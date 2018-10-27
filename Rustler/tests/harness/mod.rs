@@ -9,7 +9,6 @@
 extern crate rustler;
 
 use std::os::raw;
-use std::sync;
 use std::sync::mpsc;
 use std::net;
 use std::thread;
@@ -125,27 +124,33 @@ pub fn simulate(shape: & mut throttle::Throttle, police: & mut throttle::Throttl
  * ACTUAL EVENT STREAM
  ******************************************************************************/
 
-fn producer(limit: usize, output: & mut mpsc::SyncSender<u8>, total: & mut usize, checksum: & mut u16) {
+fn producer(limit: usize, output: & mpsc::SyncSender<u8>, total: & mut usize, checksum: & mut u16) {
     let mut buffer = [0u8; 65536];
     
 }
 
-fn shaper(input: & mut mpsc::Receiver<u8>, shape: & mut throttle::Throttle, output: & mut net::UdpSocket, address: & net::SocketAddrV4) {
+fn shaper(input: & mpsc::Receiver<u8>, shape: & 'static mut throttle::Throttle, output: & net::UdpSocket, address: & net::SocketAddrV4) {
     let mut buffer = [0u8; 65536];
     
 }
 
-fn policer(input: & mut net::UdpSocket, police: & mut throttle::Throttle, output: & mut mpsc::SyncSender<u8>) {
+fn policer(input: & net::UdpSocket, police: & 'static mut throttle::Throttle, output: & mpsc::SyncSender<u8>) {
     let mut buffer = [0u8; 65536];
     
 }
 
-fn consumer(input: & mut mpsc::Receiver<u8>, total: & mut usize, checksum: & mut u16) {
+fn consumer(input: & mpsc::Receiver<u8>, total: & mut usize, checksum: & mut u16) {
     let mut buffer = [0u8; 65536];
     
 }
 
-pub fn actualate(shape: & mut throttle::Throttle, police: & mut throttle::Throttle, maximum: usize, total: usize) {
+    
+/// Because we pass the throttles to the threads and don't otherwise touch
+/// the objects until the threads exit and we have joined with them, we don't
+/// need to protect the objects with a Mutex. However, the lifetimes of the
+/// throttles must be static so that they are not destroyed while the threads
+/// are still running.
+pub fn actualate(shape: & 'static mut throttle::Throttle, police: & 'static mut throttle::Throttle, maximum: usize, total: usize) {
     let mut producertotal: usize = 1;
     let mut producerchecksum: u16 = 2;
     let mut consumertotal: usize = 3;
@@ -159,13 +164,16 @@ pub fn actualate(shape: & mut throttle::Throttle, police: & mut throttle::Thrott
     let source = net::UdpSocket::bind("127.0.0.1:5555").expect("couldn't bind to address");
     let sink = net::UdpSocket::bind("127.0.0.1:0").expect("couldn't bind to address");
     let destination = net::SocketAddrV4::new(net::Ipv4Addr::new(127, 0, 0, 1), 5555);
-    
-    eprintln!("actualate: Beginning.");
-    
-    let consuming = thread::spawn( move || { consumer(& mut demand_rx, & mut consumertotal, & mut consumerchecksum); } );
-    let policing  = thread::spawn( move || { policer(& mut source, police, & mut demand_tx); } );
-    let shaping   = thread::spawn( move || { shaper(& mut supply_rx, shape, & mut sink, & destination); } );
-    let producing = thread::spawn( move || { producer(total, & mut supply_tx, & mut producertotal, & mut producerchecksum); } );
+        
+    eprintln!("actualate: Starting.");
+   
+    let consuming = thread::spawn( move || { consumer(& demand_rx, & mut consumertotal, & mut consumerchecksum) } );
+
+    let policing  = thread::spawn( move || { policer(& source, police, & demand_tx) } );
+
+    let shaping   = thread::spawn( move || { shaper(& supply_rx, shape, & sink, & destination) } );
+
+    let producing = thread::spawn( move || { producer(total, & supply_tx, & mut producertotal, & mut producerchecksum) } );
     
     eprintln!("actualate: Waiting.");
    

@@ -16,6 +16,7 @@
 pub mod throttle {
 
     use ticks::ticks;
+    use std::marker;
  
     /// Events is the type used to indicate how many events have been emitted since
     /// the last update of the throttle. An event can be the emission of a single
@@ -24,7 +25,16 @@ pub mod throttle {
     /// event.
     pub type Events = i64;
     
-    pub trait Throttle {
+    /// Throttle defines the standard API for rate limiting implementations.
+    /// It also specifies that throttles can be safely passed to threads. This
+    /// might not be the case for all implementations. Or even my
+    /// implementations. But a common pattern is for an application to define
+    /// a throttle and then pass it to a thread to use. Marking the Throttle as
+    /// Send means it is safe to pass to another thread; marking the throttle
+    /// as Sync means it is safe to share between threads. It is up to the
+    /// application to insure that this is indeed the case, as my
+    /// implementations incorporate no mutex.
+    pub trait Throttle : marker::Send + marker::Sync {
         
         /***************************************************************************
          * SETTERS
@@ -112,5 +122,5 @@ pub mod throttle {
         fn cleared(& self) -> bool;
    
     }
-    
+
 }

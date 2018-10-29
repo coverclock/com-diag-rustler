@@ -139,9 +139,7 @@ fn producer(maximum: usize, mut limit: usize, output: & mpsc::SyncSender<u8>, to
         limit -= size;
         count += 1;
             
-        if DEBUG {
-            eprintln!("producer: size={}B total={}B maximum={}B/burst", size, *total, largest);
-        }
+        if DEBUG { eprintln!("producer: size={}B total={}B maximum={}B/burst.", size, *total, largest); }
        
         while size > 0 {
             
@@ -165,32 +163,124 @@ fn producer(maximum: usize, mut limit: usize, output: & mpsc::SyncSender<u8>, to
 }
 
 fn shaper(input: & mpsc::Receiver<u8>, shape: & mut throttle::Throttle, output: & net::UdpSocket, address: & net::SocketAddrV4) {
+    let frequency: f64 = ticks::frequency() as f64;
     let mut buffer = [0u8; 65536];
+    let before: ticks::Ticks;
+    let after: ticks::Ticks;
+    let mut now: ticks::Ticks;
+    let mut delay: ticks::Ticks;
+    let mut duration: ticks::Ticks;
+    let mut accumulated: ticks::Ticks = 0;
+    let mut count: usize = 0;
+    let mut rate: f64;
+    let mut peak: f64 = 0.0;
+    let mut size: usize = 0;
+    let mut eof: bool = false;
+    let mut largest: usize = 0;
+    let mut alarmed: bool;
+    let mut total: usize = 0;
     
+    eprintln!("shaper: begin");
+    
+    before = ticks::now();
+    
+    while true {
+        
+        now = ticks::now();
+        delay = shape.request(now);
+        if DEBUG { eprintln!("consumer: delay={}s.", (delay as f64) / frequency); }
+        assert!(delay >= 0);
+        
+        duration = delay;
+        accumulated += delay;
+        
+        ticks::sleep(delay);
+        
+        now = ticks::now();
+        delay = shape.request(now);
+        assert!(delay == 0);
+        
+        if count == 0 {
+            // Do nothing.
+        } else if duration == 0 {
+            // Do nothing.
+        } else {
+            rate = ((size as f64) * frequency) / (duration as f64);
+            if rate > peak { peak = rate; }
+        }
+        
+        size = 0;
+        while true {
+            
+            match input.recv() {
+                Ok(value) => { buffer[size] = value; size+=1; },
+                Err(_) => { eof = true; }
+            }
+            if eof { break; }
+            if buffer[size] == 0x00 { break; }
+        
+        }
+        if eof { break; }
+        if size > largest { largest = size; }
+        total += size;
+        
+        match output.send_to(&buffer[..size], address) {
+            Ok(_) => { },
+            Err(_) => { panic!(); }
+        }
+        
+        alarmed = !shape.commits(size as throttle::Events);
+        assert!(!alarmed);
+        count += 1;
+       
+        if DEBUG { eprintln!("shaper: size={}B total={}B maximum={}B/burst.", size, total, largest); }
+        
+    }
+    
+    now = ticks::now();
+    shape.update(now);
+    delay = shape.get_expected();
+    if DEBUG { eprintln!("consumer: delay={}s", (delay as f64) / frequency); }
+    ticks::sleep(delay);
+    now = ticks::now();
+    shape.update(now);
+    after = now;
+    
+    buffer[0] = 0x00;
+    size = 1;
+    match output.send_to(&buffer[..size], address) {
+        Ok(_) => { },
+        Err(_) => { panic!(); }
+    }
+    
+    let average: f64 = (accumulated as f64) / (count as f64) / frequency;
+    let mean: f64 = (total as f64) / (count as f64);
+    let sustained: f64 = (total as f64) * frequency / ((after - before) as f64);
+    
+    eprintln!("shaper: end total={}B mean={}B/burst maximum={}B/burst delay={}s/burst peak={}B/s sustained={}B/s", total, mean, largest, average, peak, sustained);    
 }
 
-fn policer(input: & net::UdpSocket, police: & mut throttle::Throttle, output: & mpsc::SyncSender<u8>) {
+fn policer(input: & net::UdpSocket, police: & mut throttle::Throttle, output: & mpsc::Sender<u8>) {
     let mut buffer = [0u8; 65536];
     
 }
 
 fn consumer(maximum: usize, input: & mpsc::Receiver<u8>, total: & mut usize, checksum: & mut u16) {
     let mut cs: fletcher::Fletcher = fletcher::Fletcher::new();
+    let mut eof: bool = false;
     let mut datum = [0u8; 1];
     
     eprintln!("consumer: begin burstsize={}B", maximum);
     
     while true {
-        
-        let result = input.recv();
-        if result == Err(mpsc::RecvError) { break; }
-        datum[0] = result.unwrap();
-        *total += 1;
-        *checksum = cs.checksum(&datum[..]);
 
-        if DEBUG && ((*total % maximum) == 0) {
-            eprintln!("consumer: total={}B", *total);
+        match input.recv() {
+            Ok(value) => { datum[0] = value; *total += 1; *checksum = cs.checksum(&datum[..]); },
+            Err(_) => { eof = true; }
         }
+        if eof { break; }
+
+        if DEBUG && ((*total % maximum) == 0) { eprintln!("consumer: total={}B.", *total); }
         
         ticks::sleep(0);
         
@@ -215,7 +305,7 @@ pub fn exercise(shape: & 'static mut throttle::Throttle, police: & 'static mut t
     eprintln!("exercise: Beginning.");
 
     let (supply_tx, supply_rx) = mpsc::sync_channel::<u8>(maximum + 1);
-    let (demand_tx, demand_rx) = mpsc::sync_channel::<u8>(maximum);
+    let (demand_tx, demand_rx) = mpsc::channel::<u8>();
     
     let source = net::UdpSocket::bind("127.0.0.1:5555").expect("couldn't bind to address");
     let sink = net::UdpSocket::bind("127.0.0.1:0").expect("couldn't bind to address");
@@ -240,8 +330,8 @@ pub fn exercise(shape: & 'static mut throttle::Throttle, police: & 'static mut t
 
     eprintln!("exercise: Checking.");
     
-    eprintln!("exercise: produced={}:{:04x}", producertotal, producerchecksum);
-    eprintln!("exercise: consumer={}:{:04x}", consumertotal, consumerchecksum);
+    eprintln!("exercise: produced={}:{:04x}.", producertotal, producerchecksum);
+    eprintln!("exercise: consumer={}:{:04x}.", consumertotal, consumerchecksum);
 
     assert!(consumertotal == producertotal);
     assert!(consumerchecksum == producerchecksum);

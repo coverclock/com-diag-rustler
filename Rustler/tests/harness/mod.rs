@@ -16,25 +16,6 @@ use rustler::ticks::ticks;
 use rustler::throttle::throttle;
 use rustler::fletcher::fletcher;
 
-/*
-fn blocksize(maximum: usize) -> usize {
-    return maximum / 2;
-}
-*/
-
-/*
-extern crate rand;
-
-use rand::Rng;
-
-fn blocksize(maximum: usize) -> usize {
-    let mut rng = rand::thread_rng();
-    let size: usize = rng.gen_range(0, maximum) + 1;
-    
-    return size;
-}
-*/
-
 extern {
     /// rand(3) <stdlib.h> libc.
     fn rand() -> raw::c_int;
@@ -138,6 +119,8 @@ pub fn simulate(shape: & mut throttle::Throttle, police: & mut throttle::Throttl
  * ACTUAL EVENT STREAM
  ******************************************************************************/
 
+const DEBUG: bool = true;
+
 fn producer(maximum: usize, mut limit: usize, output: & mpsc::SyncSender<u8>, total: & mut usize, checksum: & mut u16) {
     let mut count: usize = 0;
     let mut largest: usize = 0;
@@ -155,6 +138,10 @@ fn producer(maximum: usize, mut limit: usize, output: & mpsc::SyncSender<u8>, to
         *total += size;
         limit -= size;
         count += 1;
+            
+        if DEBUG {
+            eprintln!("producer: size={}B total={}B maximum={}B/burst", size, *total, largest);
+        }
        
         while size > 0 {
             
@@ -187,9 +174,29 @@ fn policer(input: & net::UdpSocket, police: & mut throttle::Throttle, output: & 
     
 }
 
-fn consumer(input: & mpsc::Receiver<u8>, total: & mut usize, checksum: & mut u16) {
-    let mut buffer = [0u8; 65536];
+fn consumer(maximum: usize, input: & mpsc::Receiver<u8>, total: & mut usize, checksum: & mut u16) {
+    let mut cs: fletcher::Fletcher = fletcher::Fletcher::new();
+    let mut datum = [0u8; 1];
     
+    eprintln!("consumer: begin burstsize={}B", maximum);
+    
+    while true {
+        
+        let result = input.recv();
+        if result == Err(mpsc::RecvError) { break; }
+        datum[0] = result.unwrap();
+        *total += 1;
+        *checksum = cs.checksum(&datum[..]);
+
+        if DEBUG && ((*total % maximum) == 0) {
+            eprintln!("consumer: total={}B", *total);
+        }
+        
+        ticks::sleep(0);
+        
+    }
+    
+    eprintln!("consumer: end total={}B", *total);
 }
 
 /// Exercise a shaping throttle and a policing throttle by producing an
@@ -216,7 +223,7 @@ pub fn exercise(shape: & 'static mut throttle::Throttle, police: & 'static mut t
         
     eprintln!("exercise: Starting.");
    
-    let consuming = thread::spawn( move || { consumer(& demand_rx, & mut consumertotal, & mut consumerchecksum) } );
+    let consuming = thread::spawn( move || { consumer(maximum, & demand_rx, & mut consumertotal, & mut consumerchecksum) } );
 
     let policing  = thread::spawn( move || { policer(& source, police, & demand_tx) } );
 

@@ -16,12 +16,8 @@ use rustler::ticks::ticks;
 use rustler::throttle::throttle;
 use rustler::fletcher::fletcher;
 
-/*******************************************************************************
- * SIMULATED EVENT STREAM
- ******************************************************************************/
-
 /*
-fn blocksize(maximum: throttle::Events) -> throttle::Events {
+fn blocksize(maximum: usize) -> usize {
     return maximum / 2;
 }
 */
@@ -31,9 +27,9 @@ extern crate rand;
 
 use rand::Rng;
 
-fn blocksize(maximum: throttle::Events) -> throttle::Events {
+fn blocksize(maximum: usize) -> usize {
     let mut rng = rand::thread_rng();
-    let size: throttle::Events = rng.gen_range(0, maximum) + 1;
+    let size: usize = rng.gen_range(0, maximum) + 1;
     
     return size;
 }
@@ -45,24 +41,42 @@ extern {
 }
 
 /// Compute a random blocksize between the values 1 and maximum inclusive.
-pub fn blocksize(maximum: throttle::Events) -> throttle::Events {
+pub fn blocksize(maximum: usize) -> usize {
     unsafe {
-        let size: throttle::Events = ((rand() % (maximum as raw::c_int)) + 1) as throttle::Events;
+        let size: usize = ((rand() % (maximum as raw::c_int)) + 1) as usize;
+
         assert!(size >= 1);
         assert!(size <= maximum);
+
         return size;
     }
 }
 
+/// Compute a eight-bit datum between the values 1 and maximum inclusive.
+pub fn payload(maximum: u8) -> u8 {
+    unsafe {
+        let byte: u8 = ((rand() % (maximum as raw::c_int)) + 1) as u8;
+
+        assert!(byte >= 1);
+        assert!(byte <= maximum);
+
+        return byte;
+    }
+}
+
+/*******************************************************************************
+ * SIMULATED EVENT STREAM
+ ******************************************************************************/
+
 /// Simulate a data stream through a shaping throttle and a policing throttle
 /// given a maximum blocksize value and a limit on iterations.
-pub fn simulate(shape: & mut throttle::Throttle, police: & mut throttle::Throttle, maximum: throttle::Events, iterations: throttle::Events) {
+pub fn simulate(shape: & mut throttle::Throttle, police: & mut throttle::Throttle, maximum: usize, iterations: usize) {
     let frequency: f64 = ticks::frequency() as f64;
     let mut delay: ticks::Ticks;
     let mut now: ticks::Ticks = 0;
     let mut duration: ticks::Ticks = 0;
-    let mut size: throttle::Events = 0;
-    let mut total: u64 = 0;
+    let mut size: usize = 0;
+    let mut total: usize = 0;
     let mut rate: f64;
     let mut peak: f64 = 0.0;
     let mut admissable: bool;
@@ -92,12 +106,12 @@ pub fn simulate(shape: & mut throttle::Throttle, police: & mut throttle::Throttl
         size = blocksize(maximum);
         assert!(size > 0);
         assert!(size <= maximum);
-        total += size as u64;
+        total += size;
         
-        admissable = shape.commits(size);
+        admissable = shape.commits(size as throttle::Events);
         assert!(admissable);
         
-        admitted = police.admits(now, size);
+        admitted = police.admits(now, size as throttle::Events);
         assert!(admitted);
         
     }
@@ -124,17 +138,51 @@ pub fn simulate(shape: & mut throttle::Throttle, police: & mut throttle::Throttl
  * ACTUAL EVENT STREAM
  ******************************************************************************/
 
-fn producer(limit: usize, output: & mpsc::SyncSender<u8>, total: & mut usize, checksum: & mut u16) {
+fn producer(maximum: usize, mut limit: usize, output: & mpsc::SyncSender<u8>, total: & mut usize, checksum: & mut u16) {
+    let mut count: usize = 0;
+    let mut largest: usize = 0;
+    let mut cs: fletcher::Fletcher = fletcher::Fletcher::new();
+    let mut size: usize;
+    let mut datum = [0u8; 1];
+    
+    eprintln!("producer: begin burstsize={}B", maximum);
+    
+    while limit > 0 {
+        
+        size = blocksize(maximum as usize);
+        if size > limit { size = limit }
+        if size > largest { largest = size; }
+        *total += size;
+        limit -= size;
+        count += 1;
+       
+        while size > 0 {
+            
+            datum[0] = payload(b'~' - b' ' + 1) + b' ' - 1;
+            *checksum = cs.checksum(&datum[..]);
+            output.send(datum[0]);
+            size -= 1;
+            
+        }
+
+        datum[0] = 0x00;
+        output.send(datum[0]);
+
+        ticks::sleep(0);
+        
+    }
+    
+    drop(output);
+    
+    eprintln!("producer: end total={}B mean={}B/burst maximum={}B/burst.", *total, (*total as f64) / (count as f64), largest);
+}
+
+fn shaper(input: & mpsc::Receiver<u8>, shape: & mut throttle::Throttle, output: & net::UdpSocket, address: & net::SocketAddrV4) {
     let mut buffer = [0u8; 65536];
     
 }
 
-fn shaper(input: & mpsc::Receiver<u8>, shape: & 'static mut throttle::Throttle, output: & net::UdpSocket, address: & net::SocketAddrV4) {
-    let mut buffer = [0u8; 65536];
-    
-}
-
-fn policer(input: & net::UdpSocket, police: & 'static mut throttle::Throttle, output: & mpsc::SyncSender<u8>) {
+fn policer(input: & net::UdpSocket, police: & mut throttle::Throttle, output: & mpsc::SyncSender<u8>) {
     let mut buffer = [0u8; 65536];
     
 }
@@ -144,28 +192,29 @@ fn consumer(input: & mpsc::Receiver<u8>, total: & mut usize, checksum: & mut u16
     
 }
 
-    
+/// Exercise a shaping throttle and a policing throttle by producing an
+/// actual event stream, shaping it, policing it, and consuming it four threads.
 /// Because we pass the throttles to the threads and don't otherwise touch
 /// the objects until the threads exit and we have joined with them, we don't
 /// need to protect the objects with a Mutex. However, the lifetimes of the
-/// throttles must be static so that they are not destroyed while the threads
-/// are still running.
-pub fn actualate(shape: & 'static mut throttle::Throttle, police: & 'static mut throttle::Throttle, maximum: usize, total: usize) {
+/// throttles must be static so that they are not destroyed when they go out
+/// of scope in the caller while the threads are still running.
+pub fn exercise(shape: & 'static mut throttle::Throttle, police: & 'static mut throttle::Throttle, maximum: usize, total: usize) {
     let mut producertotal: usize = 1;
     let mut producerchecksum: u16 = 2;
     let mut consumertotal: usize = 3;
     let mut consumerchecksum: u16 = 4;
     
-    eprintln!("actualate: Beginning.");
+    eprintln!("exercise: Beginning.");
 
-    let (supply_tx, supply_rx) = mpsc::sync_channel::<u8>(maximum);
+    let (supply_tx, supply_rx) = mpsc::sync_channel::<u8>(maximum + 1);
     let (demand_tx, demand_rx) = mpsc::sync_channel::<u8>(maximum);
     
     let source = net::UdpSocket::bind("127.0.0.1:5555").expect("couldn't bind to address");
     let sink = net::UdpSocket::bind("127.0.0.1:0").expect("couldn't bind to address");
     let destination = net::SocketAddrV4::new(net::Ipv4Addr::new(127, 0, 0, 1), 5555);
         
-    eprintln!("actualate: Starting.");
+    eprintln!("exercise: Starting.");
    
     let consuming = thread::spawn( move || { consumer(& demand_rx, & mut consumertotal, & mut consumerchecksum) } );
 
@@ -173,23 +222,23 @@ pub fn actualate(shape: & 'static mut throttle::Throttle, police: & 'static mut 
 
     let shaping   = thread::spawn( move || { shaper(& supply_rx, shape, & sink, & destination) } );
 
-    let producing = thread::spawn( move || { producer(total, & supply_tx, & mut producertotal, & mut producerchecksum) } );
+    let producing = thread::spawn( move || { producer(maximum, total, & supply_tx, & mut producertotal, & mut producerchecksum) } );
     
-    eprintln!("actualate: Waiting.");
+    eprintln!("exercise: Waiting.");
    
     let consumed = consuming.join();
     let policed = policing.join();
     let shaped = shaping.join();
     let produced = producing.join();
 
-    eprintln!("actualate: Checking.");
+    eprintln!("exercise: Checking.");
     
-    eprintln!("actualate: produced={}:{:04x}", producertotal, producerchecksum);
-    eprintln!("actualate: consumer={}:{:04x}", consumertotal, consumerchecksum);
+    eprintln!("exercise: produced={}:{:04x}", producertotal, producerchecksum);
+    eprintln!("exercise: consumer={}:{:04x}", consumertotal, consumerchecksum);
 
     assert!(consumertotal == producertotal);
     assert!(consumerchecksum == producerchecksum);
     
-    eprintln!("actualate: Ending.");
+    eprintln!("exercise: Ending.");
 
 }

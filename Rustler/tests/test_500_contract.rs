@@ -19,11 +19,11 @@ mod harness;
 fn test_contract_400_simulated() {
     let frequency: ticks::Ticks = ticks::frequency();
     let peakincrement: ticks::Ticks = gcra::increment(2048, 1, frequency);
-    let burstsize: throttle::Events = 512;
-    let jittertolerance: ticks::Ticks = gcra::jittertolerance(peakincrement, burstsize);
+    let burstsize: usize = 512;
+    let jittertolerance: ticks::Ticks = gcra::jittertolerance(peakincrement, burstsize as throttle::Events);
     let sustainedincrement: ticks::Ticks = gcra::increment(1024, 1, frequency);
-    let bursttolerance: ticks::Ticks = contract::bursttolerance(peakincrement, 0, sustainedincrement, burstsize);
-    let iterations: throttle::Events = 1000000;
+    let bursttolerance: ticks::Ticks = contract::bursttolerance(peakincrement, 0, sustainedincrement, burstsize as throttle::Events);
+    let iterations: usize = 1000000;
     let now: ticks::Ticks = ticks::now();
     let mut shaper: contract::Contract = contract::Contract::new();
     let mut policer: contract::Contract = contract::Contract::new();

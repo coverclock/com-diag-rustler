@@ -261,7 +261,100 @@ fn shaper(input: & mpsc::Receiver<u8>, shape: & mut throttle::Throttle, output: 
 }
 
 fn policer(input: & net::UdpSocket, police: & mut throttle::Throttle, output: & mpsc::Sender<u8>) {
+    let mut eof: bool = false;
     let mut buffer = [0u8; 65536];
+    let frequency: f64 = ticks::frequency() as f64;
+    let before: ticks::Ticks;
+    let after: ticks::Ticks;
+    let mut now: ticks::Ticks = 0;
+    let mut then: ticks::Ticks;
+    let mut size: usize = 0;
+    let mut count: usize = 0;
+    let mut rate: f64;
+    let mut peak: f64 = 0.0;
+    let mut total: usize = 0;
+    let mut largest: usize = 0;
+    let mut admissable: bool;
+    let mut admitted: usize = 0;
+    let mut policed: usize = 0;
+    let mut index: usize;
+    
+    eprintln!("policer: start");
+    
+    before = ticks::now();
+    
+    while !eof {       
+        
+        match input.recv_from(& mut buffer) {
+            Ok(value) => { size = value.0; }
+            Err(_) => { panic!(); }
+        }
+        assert!(size > 0);
+
+        if buffer[size - 1] == 0x00 {
+            eof = true;
+            size = 0;
+        }
+
+        then = now;
+        now = ticks::now();
+        
+        if count == 0 {
+            // Do nothing.
+        } else if size == 0 {
+            // Do nothing.
+        } else if now <= then {
+            // Do nothing.
+        } else {
+            rate = (size as f64) * frequency / ((now - then) as f64);
+            if rate > peak { peak = rate; }
+        }
+        
+        if size > 0 {
+        
+            total += size;
+            if size > largest { largest = size; }
+            
+            admissable = police.admits(now, size as throttle::Events);
+            if admissable {
+                admitted += size;
+                if DEBUG { eprintln!("policer: admitted={} size={}B total={}B.", admitted, size, total); }
+            } else {
+                policed += size;
+                if DEBUG { eprintln!("policer: policed={} size={}B total={}B.", policed, size, total); }
+            }
+            
+            index = 0;
+            while index < size {
+                output.send(buffer[index]);
+                index += 1;
+            }
+            
+            count += 1;
+        
+        } else if eof {
+            
+            police.update(now);
+            
+        } else {
+            
+            panic!();
+            
+        }
+        
+        ticks::sleep(0);
+        
+    }
+    
+    after = ticks::now();
+    
+    drop(output);
+    
+    let mean: f64 = (total as f64) / (count as f64);
+    let sustained: f64 = (total as f64) * frequency / ((after - before) as f64);
+    
+    eprintln!("policer: count={} admitted={} policed={}", count, admitted, policed);
+    eprintln!("policer: end total={}B mean={}B/burst maximum={}B/burst peak={}B/s sustained={}B/s", total, mean, largest, peak, sustained);    
     
 }
 

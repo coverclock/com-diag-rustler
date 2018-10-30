@@ -33,8 +33,7 @@ fn test_gcra_200_jittertolerance() {
 
 #[test]
 fn test_gcra_220_copy() {
-    let mut original: gcra::Gcra = gcra::Gcra::new();
-    original.init(2, 4, 6);
+    let mut original: gcra::Gcra = gcra::Gcra::new().init(2, 4, 6);
     original.reset(8);
     let mut duplicate: gcra::Gcra = original;
     duplicate.init(1, 3, 5);
@@ -43,8 +42,7 @@ fn test_gcra_220_copy() {
 
 #[test]
 fn test_gcra_240_clone() {
-    let mut original: gcra::Gcra = gcra::Gcra::new();
-    original.init(2, 4, 6);
+    let mut original: gcra::Gcra = gcra::Gcra::new().init(2, 4, 6);
     original.reset(8);
     let mut duplicate: gcra::Gcra = original.clone();
     duplicate.init(1, 3, 5);

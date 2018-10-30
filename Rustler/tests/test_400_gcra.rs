@@ -587,22 +587,11 @@ fn test_gcra_400_simulated() {
     let now: ticks::Ticks = ticks::now();
     let mut shaper: gcra::Gcra = gcra::Gcra::new();
     let mut policer: gcra::Gcra = gcra::Gcra::new();
-    shaper = gcra::Gcra::new();
-    policer = gcra::Gcra::new();
-    /**/
-    eprintln!("shaper={}", shaper.to_string());
-    eprintln!("policer={}", policer.to_string());
-    /**/
+   /**/
     shaper.init(increment, 0, now);
     policer.init(increment, limit, now);
     /**/
-    eprintln!("shaper={}", shaper.to_string());
-    eprintln!("policer={}", policer.to_string());
-    /**/
     harness::simulate(& mut shaper, & mut policer, burstsize, iterations);
-    /**/
-    eprintln!("shaper={}", shaper.to_string());
-    eprintln!("policer={}", policer.to_string());
 }
 
 /*

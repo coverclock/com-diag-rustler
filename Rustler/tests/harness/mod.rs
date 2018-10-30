@@ -59,7 +59,12 @@ pub fn simulate(shape: & mut throttle::Throttle, police: & mut throttle::Throttl
     let mut peak: f64 = 0.0;
     let mut admissable: bool;
     let mut admitted: bool;
-        
+    
+    eprintln!("simulate: shape={}", shape.as_string());
+    eprintln!("simulate: police={}", police.as_string());
+    eprintln!("simulate: maximum={}", maximum);
+    eprintln!("simulate: iterations={}", iterations);
+     
     for ii in 0..iterations {
         
         delay = shape.request(now);
@@ -109,12 +114,16 @@ pub fn simulate(shape: & mut throttle::Throttle, police: & mut throttle::Throttl
     let mean: f64 = seconds / (iterations as f64);
     let sustained: f64 = (total as f64) * frequency / (duration as f64);
 
-    println!("simulate: total={}B mean={}B/io maximum={}B/io latency={}s/io peak={}B/s sustained={}B/s.", total, average, maximum, mean, peak, sustained);
+    eprintln!("simulate: shape={}", shape.as_string());
+    eprintln!("simulate: police={}", police.as_string());
+    eprintln!("simulate: total={}B mean={}B/io maximum={}B/io latency={}s/io peak={}B/s sustained={}B/s.", total, average, maximum, mean, peak, sustained);
 }
 
 /*******************************************************************************
  * ACTUAL EVENT STREAM
  ******************************************************************************/
+
+/*
 
 use std::sync;
 use std::sync::mpsc;
@@ -383,8 +392,6 @@ fn consumer(maximum: usize, input: & mpsc::Receiver<u8>, total: & mut usize, che
     eprintln!("consumer: end total={}B", *total);
 }
 
-/*
-
 /// Exercise a shaping throttle and a policing throttle by producing an
 /// actual event stream, shaping it, policing it, and consuming it four threads.
 pub fn exercise(shape: & mut throttle::Throttle, police: & mut throttle::Throttle, maximum: usize, total: usize) {
@@ -401,7 +408,7 @@ pub fn exercise(shape: & mut throttle::Throttle, police: & mut throttle::Throttl
     let source = net::UdpSocket::bind("127.0.0.1:5555").expect("couldn't bind to address");
     let sink = net::UdpSocket::bind("127.0.0.1:0").expect("couldn't bind to address");
     let destination = net::SocketAddrV4::new(net::Ipv4Addr::new(127, 0, 0, 1), 5555);
-        
+       
     eprintln!("exercise: Starting.");
    
     let consuming = thread::spawn( move || { consumer(maximum, & demand_rx, & mut consumertotal, & mut consumerchecksum) } );

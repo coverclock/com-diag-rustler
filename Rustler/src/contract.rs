@@ -51,18 +51,10 @@ pub mod contract {
     }
     
     impl marker::Copy for Contract {
-         
-        /***************************************************************************
-         * COPIERS
-         **************************************************************************/
         
     }
 
     impl clone::Clone for Contract {
-         
-        /***************************************************************************
-         * CLONERS
-         **************************************************************************/
 
         fn clone(&self) -> Contract {
             *self
@@ -74,10 +66,6 @@ pub mod contract {
     
     impl string::ToString for Contract {
         
-        /***************************************************************************
-         * CONVERTORS
-         **************************************************************************/
-        
         fn to_string(& self) -> string::String {
             format!("Contract@{:p}[{}]:{{p:{},s:{}}}",
                 self, SIZE_OF,
@@ -88,6 +76,15 @@ pub mod contract {
     }
    
     impl throttle::Throttle for Contract {
+
+        /***************************************************************************
+         * CONVERTORS
+         **************************************************************************/
+         
+        /// to_string returns the underlying object as a printable string.
+        fn as_string(& self) -> string::String {
+            string::ToString::to_string(self)
+        }
         
         /***************************************************************************
          * SETTERS

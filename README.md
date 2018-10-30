@@ -72,17 +72,18 @@ framework or library (typically to manage some custom hardware), this is
 an important feature.
 
 In the past few years of consulting on embedded product development
-projects, I've seen a trend in companies bringing in an embedded expert (me)
+projects, I've seen a trend in clients bringing in an embedded expert (me)
 to handle the low level stuff in C or C++, and use much less expensive
 devlopers working in, for example, Python or JavaScript, to do the higher
 level development. With Rust, I would expect this times ten, providing you
 could find an actual legitimate Rust expert at all. While I appreciate the
 Rust strategy of making thread race conditions or memory leaks virtually
 impossible by stringent compile time checking, you have to compare that with
-the cost of writing Rust code; the economics of this aren't clear to me.
+the cost of writing Rust code; the economics of this eludes me.
 You have the choice between finding an experienced Rust developer, or finding
 an experienced C or C++ developer who can write code without such flaws. I
-suspect it is a lot easier to do the latter.
+suspect that as difficult as the latter is, it is a lot easier than the former,
+even though the correctness of the Rust code is probably more credible.
 
 Or you could just write in Go, and get to market a lot quicker.
 

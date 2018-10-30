@@ -40,17 +40,8 @@ fn test_contract_400_simulated() {
     let mut shaper: contract::Contract = contract::Contract::new();
     let mut policer: contract::Contract = contract::Contract::new();
     /**/
-    eprintln!("shaper={}", shaper.to_string());
-    eprintln!("policer={}", policer.to_string());
-    /**/
     shaper.init(peakincrement, 0, sustainedincrement, bursttolerance, now);
     policer.init(peakincrement, jittertolerance, sustainedincrement, bursttolerance, now);
     /**/
-    eprintln!("shaper={}", shaper.to_string());
-    eprintln!("policer={}", policer.to_string());
-    /**/
     harness::simulate(& mut shaper, & mut policer, burstsize, iterations);
-    /**/
-    eprintln!("shaper={}", shaper.to_string());
-    eprintln!("policer={}", policer.to_string());
 }

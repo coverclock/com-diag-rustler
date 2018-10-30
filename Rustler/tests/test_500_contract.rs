@@ -10,6 +10,7 @@ extern crate rustler;
 
 use rustler::ticks::ticks;
 use rustler::throttle::throttle;
+use rustler::throttle::throttle::Throttle;
 use rustler::gcra::gcra;
 use rustler::contract::contract;
 
@@ -17,14 +18,20 @@ mod harness;
 
 #[test]
 fn test_contract_220_copy() {
-    let original: contract::Contract = contract::Contract::new();
-    let duplicate: contract::Contract = original;
+    let mut original: contract::Contract = contract::Contract::new().init(2, 4, 6, 8, 10);
+    original.reset(12);
+    let mut duplicate: contract::Contract = original;
+    duplicate.init(1, 3, 5, 7, 9);
+    duplicate.reset(11);
 }
 
 #[test]
 fn test_contract_240_clone() {
-    let original: contract::Contract = contract::Contract::new();
-    let duplicate: contract::Contract = original.clone();
+    let mut original: contract::Contract = contract::Contract::new().init(2, 4, 6, 8, 10);
+    original.reset(12);
+    let mut duplicate: contract::Contract = original.clone();
+    duplicate.init(1, 3, 5, 7, 9);
+    duplicate.reset(11);
 }
 
 #[test]

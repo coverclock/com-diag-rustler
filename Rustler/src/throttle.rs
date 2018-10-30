@@ -15,8 +15,6 @@
 ///
 pub mod throttle {
 
-    use std::fmt;
-    use std::string;
     use ticks::ticks;
  
     /// Events is the type used to indicate how many events have been emitted since

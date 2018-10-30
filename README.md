@@ -52,8 +52,9 @@ My experience writing in Rust reminds me of a comment a colleage of mine made
 decades ago about the Ada programming language: "If you can just get your
 program to compile, it frequently works the first time."
 
-I think my main issue with Rust was how under-documented it is. And because
-it’s new-ish and a moving target, much of what is documented is subtly wrong.
+I think my main issue with Rust was how under-documented it is. In order to
+do the kinds of things I routinely do (and which are trivial in Go), you must
+have an extraordinaryly high level of expertise in the language.
 This made the learning experience especially painful and often a matter of
 laborious reverse engineering or trial and error. And unlike Go, I didn’t
 find using Rust intuitive; for me, it was difficult to predict its
@@ -69,6 +70,21 @@ I also appreciate how trivial it was to call a C function from libc using
 Rust. Since most stuff I work on entails integrating with some legacy
 framework or library (typically to manage some custom hardware), this is
 an important feature.
+
+In the past few years of consulting on embedded product development
+projects, I've seen a trend in companies bringing in an embedded expert (me)
+to handle the low level stuff in C or C++, and use much less expensive
+devlopers working in, for example, Python or JavaScript, to do the higher
+level development. With Rust, I would expect this times ten, providing you
+could find an actual legitimate Rust expert at all. While I appreciate the
+Rust strategy of making thread race conditions or memory leaks virtually
+impossible by stringent compile time checking, you have to compare that with
+the cost of writing Rust code; the economics of this aren't clear to me.
+You have the choice between finding an experienced Rust developer, or finding
+an experienced C or C++ developer who can write code without such flaws. I
+suspect it is a lot easier to do the latter.
+
+Or you could just write in Go, and get to market a lot quicker.
 
 ## Repositories
 

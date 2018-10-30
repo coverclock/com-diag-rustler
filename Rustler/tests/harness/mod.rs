@@ -9,9 +9,6 @@
 extern crate rustler;
 
 use std::os::raw;
-use std::sync::mpsc;
-use std::net;
-use std::thread;
 use rustler::ticks::ticks;
 use rustler::throttle::throttle;
 use rustler::fletcher::fletcher;
@@ -118,7 +115,11 @@ pub fn simulate(shape: & mut throttle::Throttle, police: & mut throttle::Throttl
 /*******************************************************************************
  * ACTUAL EVENT STREAM
  ******************************************************************************/
-/*
+
+use std::sync;
+use std::sync::mpsc;
+use std::net;
+use std::thread;
 
 const DEBUG: bool = true;
 
@@ -356,7 +357,6 @@ fn policer(input: & net::UdpSocket, police: & mut throttle::Throttle, output: & 
     
     eprintln!("policer: count={} admitted={} policed={}", count, admitted, policed);
     eprintln!("policer: end total={}B mean={}B/burst maximum={}B/burst peak={}B/s sustained={}B/s", total, mean, largest, peak, sustained);    
-    
 }
 
 fn consumer(maximum: usize, input: & mpsc::Receiver<u8>, total: & mut usize, checksum: & mut u16) {
@@ -385,12 +385,7 @@ fn consumer(maximum: usize, input: & mpsc::Receiver<u8>, total: & mut usize, che
 
 /// Exercise a shaping throttle and a policing throttle by producing an
 /// actual event stream, shaping it, policing it, and consuming it four threads.
-/// Because we pass the throttles to the threads and don't otherwise touch
-/// the objects until the threads exit and we have joined with them, we don't
-/// need to protect the objects with a Mutex. However, the lifetimes of the
-/// throttles must be static so that they are not destroyed when they go out
-/// of scope in the caller while the threads are still running.
-pub fn exercise(shape: & 'static mut throttle::Throttle, police: & 'static mut throttle::Throttle, maximum: usize, total: usize) {
+pub fn exercise(shape: & mut throttle::Throttle, police: & mut throttle::Throttle, maximum: usize, total: usize) {
     let mut producertotal: usize = 1;
     let mut producerchecksum: u16 = 2;
     let mut consumertotal: usize = 3;
@@ -400,7 +395,7 @@ pub fn exercise(shape: & 'static mut throttle::Throttle, police: & 'static mut t
 
     let (supply_tx, supply_rx) = mpsc::sync_channel::<u8>(maximum + 1);
     let (demand_tx, demand_rx) = mpsc::channel::<u8>();
-    
+
     let source = net::UdpSocket::bind("127.0.0.1:5555").expect("couldn't bind to address");
     let sink = net::UdpSocket::bind("127.0.0.1:0").expect("couldn't bind to address");
     let destination = net::SocketAddrV4::new(net::Ipv4Addr::new(127, 0, 0, 1), 5555);
@@ -413,7 +408,7 @@ pub fn exercise(shape: & 'static mut throttle::Throttle, police: & 'static mut t
     let producing = thread::spawn( move || { producer(maximum, total, & supply_tx, & mut producertotal, & mut producerchecksum) } );
     
     eprintln!("exercise: Waiting.");
-   
+
     match consuming.join() {
         Ok(_) => { },
         Err(_) => { panic!(); }
@@ -442,5 +437,3 @@ pub fn exercise(shape: & 'static mut throttle::Throttle, police: & 'static mut t
     eprintln!("exercise: Ending.");
 
 }
-
-*/

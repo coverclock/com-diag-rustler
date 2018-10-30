@@ -37,7 +37,8 @@
 ///
 pub mod contract {
 
-    use std::fmt;
+    use std::marker;
+    use std::clone;
     use std::string;
     use std::mem;
     use ticks::ticks;
@@ -50,6 +51,26 @@ pub mod contract {
     }
 
     pub static SIZEOF: usize = mem::size_of::<Contract>();
+    
+    impl marker::Copy for Contract {
+         
+        /***************************************************************************
+         * COPIES
+         **************************************************************************/
+        
+    }
+
+    impl clone::Clone for Contract {
+         
+        /***************************************************************************
+         * CLONES
+         **************************************************************************/
+
+        fn clone(&self) -> Contract {
+            *self
+        }
+
+    }
     
     impl string::ToString for Contract {
         

@@ -45,7 +45,8 @@
 ///
 pub mod gcra {
 
-    use std::fmt;
+    use std::marker;
+    use std::clone;
     use std::string;
     use std::mem;
     use std::i64;
@@ -70,6 +71,26 @@ pub mod gcra {
     }
 
     pub static SIZEOF: usize = mem::size_of::<Gcra>();
+    
+    impl marker::Copy for Gcra {
+         
+        /***************************************************************************
+         * COPIES
+         **************************************************************************/
+        
+    }
+
+    impl clone::Clone for Gcra {
+         
+        /***************************************************************************
+         * CLONES
+         **************************************************************************/
+
+        fn clone(&self) -> Gcra {
+            *self
+        }
+
+    }
     
     fn btoc(b: bool) -> char { if b { return '1'; } else { return '0'; } }
     

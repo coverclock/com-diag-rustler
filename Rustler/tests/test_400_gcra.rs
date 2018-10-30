@@ -32,6 +32,18 @@ fn test_gcra_200_jittertolerance() {
 }
 
 #[test]
+fn test_gcra_220_copy() {
+    let original: gcra::Gcra = gcra::Gcra::new();
+    let duplicate: gcra::Gcra = original;
+}
+
+#[test]
+fn test_gcra_240_clone() {
+    let original: gcra::Gcra = gcra::Gcra::new();
+    let duplicate: gcra::Gcra = original.clone();
+}
+
+#[test]
 fn test_gcra_300_one() {
     let mut throttle: gcra::Gcra = gcra::Gcra::new();
     let increment: ticks::Ticks = 100;

@@ -383,6 +383,8 @@ fn consumer(maximum: usize, input: & mpsc::Receiver<u8>, total: & mut usize, che
     eprintln!("consumer: end total={}B", *total);
 }
 
+/*
+
 /// Exercise a shaping throttle and a policing throttle by producing an
 /// actual event stream, shaping it, policing it, and consuming it four threads.
 pub fn exercise(shape: & mut throttle::Throttle, police: & mut throttle::Throttle, maximum: usize, total: usize) {
@@ -437,3 +439,5 @@ pub fn exercise(shape: & mut throttle::Throttle, police: & mut throttle::Throttl
     eprintln!("exercise: Ending.");
 
 }
+
+*/

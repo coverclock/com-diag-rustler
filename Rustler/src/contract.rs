@@ -49,13 +49,11 @@ pub mod contract {
         peak:       gcra::Gcra,
         sustained:  gcra::Gcra,
     }
-
-    pub static SIZEOF: usize = mem::size_of::<Contract>();
     
     impl marker::Copy for Contract {
          
         /***************************************************************************
-         * COPIES
+         * COPIERS
          **************************************************************************/
         
     }
@@ -63,7 +61,7 @@ pub mod contract {
     impl clone::Clone for Contract {
          
         /***************************************************************************
-         * CLONES
+         * CLONERS
          **************************************************************************/
 
         fn clone(&self) -> Contract {
@@ -71,6 +69,8 @@ pub mod contract {
         }
 
     }
+
+    static SIZE_OF: usize = mem::size_of::<Contract>();
     
     impl string::ToString for Contract {
         
@@ -80,7 +80,7 @@ pub mod contract {
         
         fn to_string(& self) -> string::String {
             format!("Contract@{:p}[{}]:{{p:{},s:{}}}",
-                self, SIZEOF,
+                self, SIZE_OF,
                 self.peak.to_string(),
                 self.sustained.to_string())
         }
@@ -264,7 +264,11 @@ pub mod contract {
     }
     
     impl Contract {
-        
+         
+        pub fn size_of(& self) -> usize {
+            SIZE_OF
+        }
+       
         /// Allocate a new Contract object with zero values for all its fields.
         pub fn new() -> Contract {
             Contract {

@@ -16,6 +16,18 @@ use rustler::contract::contract;
 mod harness;
 
 #[test]
+fn test_contract_220_copy() {
+    let original: contract::Contract = contract::Contract::new();
+    let duplicate: contract::Contract = original;
+}
+
+#[test]
+fn test_contract_240_clone() {
+    let original: contract::Contract = contract::Contract::new();
+    let duplicate: contract::Contract = original.clone();
+}
+
+#[test]
 fn test_contract_400_simulated() {
     let frequency: ticks::Ticks = ticks::frequency();
     let peakincrement: ticks::Ticks = gcra::increment(2048, 1, frequency);

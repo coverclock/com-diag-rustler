@@ -575,6 +575,8 @@ fn test_gcra_400_simulated() {
     let now: ticks::Ticks = ticks::now();
     let mut shaper: gcra::Gcra = gcra::Gcra::new();
     let mut policer: gcra::Gcra = gcra::Gcra::new();
+    shaper = gcra::Gcra::new();
+    policer = gcra::Gcra::new();
     /**/
     eprintln!("shaper={}", shaper.to_string());
     eprintln!("policer={}", policer.to_string());
@@ -590,3 +592,67 @@ fn test_gcra_400_simulated() {
     eprintln!("shaper={}", shaper.to_string());
     eprintln!("policer={}", policer.to_string());
 }
+
+/*
+
+#[test]
+fn test_gcra_500_exercised() {
+    let frequency: ticks::Ticks = ticks::frequency();
+    let increment: ticks::Ticks = gcra::increment(512, 1, frequency);
+    let burstsize: usize = 64;
+    let limit: ticks::Ticks = gcra::jittertolerance(increment, burstsize as throttle::Events);
+    let total: usize = 512 * 60;
+    let now: ticks::Ticks = ticks::now();
+    static mut shaper: Option<& mut gcra::Gcra> = None;
+    static mut policer: Option<& mut gcra::Gcra> = None;
+    // THIS IS NOT RIGHT: still trying to figure out the right way to do this.
+    unsafe {
+    shaper = Some(gcra::Gcra::new());
+    policer = Some(gcra::Gcra::new());
+    /**/
+    eprintln!("shaper={}", shaper.unwrap().to_string());
+    eprintln!("policer={}", policer.unwrap().to_string());
+    /**/
+    shaper.unwrap().init(increment, 0, now);
+    policer.unwrap().init(increment, limit, now);
+    /**/
+    eprintln!("shaper={}", shaper.unwrap().to_string());
+    eprintln!("policer={}", policer.unwrap().to_string());
+    /**/
+    harness::exercise(shaper.unwrap(), policer.unwrap(), burstsize, total);
+    /**/
+    eprintln!("shaper={}", shaper.unwrap().to_string());
+    eprintln!("policer={}", policer.unwrap().to_string());
+    }
+}
+
+#[test]
+fn test_gcra_600_exercised() {
+    let frequency: ticks::Ticks = ticks::frequency();
+    let increment: ticks::Ticks = gcra::increment(1024, 1, frequency);
+    let burstsize: usize = 64;
+    let limit: ticks::Ticks = gcra::jittertolerance(increment, burstsize as throttle::Events);
+    let total: usize = 1024 * 60;
+    let now: ticks::Ticks = ticks::now();
+    static mut shaper: Option<gcra::Gcra> = None;
+    static mut policer: Option<gcra::Gcra> = None;
+    // THIS IS NOT RIGHT: still trying to figure out the right way to do this.
+    unsafe {
+    /**/
+    eprintln!("shaper={}", shaper.to_string());
+    eprintln!("policer={}", policer.to_string());
+    /**/
+    shaper.init(increment, 0, now);
+    policer.init(increment, limit, now);
+    /**/
+    eprintln!("shaper={}", shaper.to_string());
+    eprintln!("policer={}", policer.to_string());
+    /**/
+    harness::exercise(& mut shaper, & mut policer, burstsize, total);
+    /**/
+    eprintln!("shaper={}", shaper.to_string());
+    eprintln!("policer={}", policer.to_string());
+    }
+}
+
+*/

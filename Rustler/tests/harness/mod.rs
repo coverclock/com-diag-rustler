@@ -118,6 +118,7 @@ pub fn simulate(shape: & mut throttle::Throttle, police: & mut throttle::Throttl
 /*******************************************************************************
  * ACTUAL EVENT STREAM
  ******************************************************************************/
+/*
 
 const DEBUG: bool = true;
 
@@ -407,19 +408,28 @@ pub fn exercise(shape: & 'static mut throttle::Throttle, police: & 'static mut t
     eprintln!("exercise: Starting.");
    
     let consuming = thread::spawn( move || { consumer(maximum, & demand_rx, & mut consumertotal, & mut consumerchecksum) } );
-
     let policing  = thread::spawn( move || { policer(& source, police, & demand_tx) } );
-
     let shaping   = thread::spawn( move || { shaper(& supply_rx, shape, & sink, & destination) } );
-
     let producing = thread::spawn( move || { producer(maximum, total, & supply_tx, & mut producertotal, & mut producerchecksum) } );
     
     eprintln!("exercise: Waiting.");
    
-    let consumed = consuming.join();
-    let policed = policing.join();
-    let shaped = shaping.join();
-    let produced = producing.join();
+    match consuming.join() {
+        Ok(_) => { },
+        Err(_) => { panic!(); }
+    }
+    match policing.join() {
+        Ok(_) => { },
+        Err(_) => { panic!(); }
+    }
+    match shaping.join() {
+        Ok(_) => { },
+        Err(_) => { panic!(); }
+    }
+    match producing.join() {
+        Ok(_) => { },
+        Err(_) => { panic!(); }
+    }
 
     eprintln!("exercise: Checking.");
     
@@ -432,3 +442,5 @@ pub fn exercise(shape: & 'static mut throttle::Throttle, police: & 'static mut t
     eprintln!("exercise: Ending.");
 
 }
+
+*/

@@ -76,7 +76,7 @@ pub mod gcra {
 
     impl clone::Clone for Gcra {
 
-        fn clone(&self) -> Gcra {
+        fn clone(&self) -> Self {
             *self
         }
 
@@ -294,7 +294,7 @@ pub mod gcra {
         }
         
         /// Allocate a new Gcra object with zero values for all its fields.
-        pub fn new() -> Gcra {
+        pub fn new() -> Self {
             Gcra {
                 now:        0,
                 then:       0,
@@ -315,10 +315,11 @@ pub mod gcra {
          
         /// Initialize a Gcra object given an increment and limit in ticks,
         /// and the current time in ticks since the epoch.
-        pub fn init(& mut self, increment: ticks::Ticks, limit: ticks::Ticks, now: ticks::Ticks) {
+        pub fn init(& mut self, increment: ticks::Ticks, limit: ticks::Ticks, now: ticks::Ticks) -> Self {
             self.increment = increment;
             self.limit = limit;
             self.reset(now);
+            return *self;
         }
 
     }

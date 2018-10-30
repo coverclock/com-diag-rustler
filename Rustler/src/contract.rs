@@ -56,7 +56,7 @@ pub mod contract {
 
     impl clone::Clone for Contract {
 
-        fn clone(&self) -> Contract {
+        fn clone(&self) -> Self {
             *self
         }
 
@@ -267,7 +267,7 @@ pub mod contract {
         }
        
         /// Allocate a new Contract object with zero values for all its fields.
-        pub fn new() -> Contract {
+        pub fn new() -> Self {
             Contract {
                 peak:       gcra::Gcra::new(),
                 sustained:  gcra::Gcra::new(),
@@ -277,9 +277,10 @@ pub mod contract {
         /// Initialize a Contract object given an peak increment and jitter
         /// tolerance in ticks, the sustained increment and burst tolerance
         /// in ticks, and the current time in ticks since the epoch.
-        pub fn init(& mut self, peakincrement: ticks::Ticks, jittertolerance: ticks::Ticks, sustainedincrement: ticks::Ticks, bursttolerance: ticks::Ticks, now: ticks::Ticks) {
+        pub fn init(& mut self, peakincrement: ticks::Ticks, jittertolerance: ticks::Ticks, sustainedincrement: ticks::Ticks, bursttolerance: ticks::Ticks, now: ticks::Ticks) -> Self {
             self.peak.init(peakincrement, jittertolerance, now);
             self.sustained.init(sustainedincrement, bursttolerance, now);
+            return *self;
         }
 
     }

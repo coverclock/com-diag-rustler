@@ -19,19 +19,29 @@ mod harness;
 #[test]
 fn test_contract_220_copy() {
     let mut original: contract::Contract = contract::Contract::new().init(2, 4, 6, 8, 10);
+    println!("O1={}", original.to_string());
     original.reset(12);
+    println!("O2={}", original.to_string());
     let mut duplicate: contract::Contract = original;
+    println!("D3={}", duplicate.to_string());
     duplicate.init(1, 3, 5, 7, 9);
+    println!("D4={}", duplicate.to_string());
     duplicate.reset(11);
+    println!("D5={}", duplicate.to_string());
 }
 
 #[test]
 fn test_contract_240_clone() {
     let mut original: contract::Contract = contract::Contract::new().init(2, 4, 6, 8, 10);
+    println!("O1={}", original.to_string());
     original.reset(12);
+    println!("O2={}", original.to_string());
     let mut duplicate: contract::Contract = original.clone();
+    println!("D3={}", duplicate.to_string());
     duplicate.init(1, 3, 5, 7, 9);
+    println!("D4={}", duplicate.to_string());
     duplicate.reset(11);
+    println!("D5={}", duplicate.to_string());
 }
 
 #[test]

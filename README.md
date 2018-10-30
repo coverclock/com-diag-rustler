@@ -54,7 +54,9 @@ program to compile, it frequently works the first time."
 
 I think my main issue with Rust was how under-documented it is. In order to
 do the kinds of things I routinely do (and which are trivial in Go), you must
-have an extraordinaryly high level of expertise in the language.
+have an extraordinaryly high level of expertise in the language. Also, because
+the language is immature and still changing, many of the examples you find
+online simply don't compile.
 This made the learning experience especially painful and often a matter of
 laborious reverse engineering or trial and error. And unlike Go, I didn’t
 find using Rust intuitive; for me, it was difficult to predict its

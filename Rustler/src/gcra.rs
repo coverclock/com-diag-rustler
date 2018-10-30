@@ -294,7 +294,7 @@ pub mod gcra {
         }
         
         /// Allocate a new Gcra object with zero values for all its fields.
-        pub fn new() -> Self {
+        pub fn new() -> Gcra {
             Gcra {
                 now:        0,
                 then:       0,
@@ -319,7 +319,7 @@ pub mod gcra {
             self.increment = increment;
             self.limit = limit;
             self.reset(now);
-            return *self;
+            *self
         }
 
     }

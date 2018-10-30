@@ -37,8 +37,8 @@ fn test_contract_400_simulated() {
     let bursttolerance: ticks::Ticks = contract::bursttolerance(peakincrement, 0, sustainedincrement, burstsize as throttle::Events);
     let iterations: usize = 1000000;
     let now: ticks::Ticks = ticks::now();
-    let mut shaper: contract::Contract = contract::Contract::new().init(peakincrement, 0, sustainedincrement, bursttolerance, now);
-    let mut policer: contract::Contract = contract::Contract::new().init(peakincrement, jittertolerance, sustainedincrement, bursttolerance, now);
+    let mut shaper = contract::Contract::new().init(peakincrement, 0, sustainedincrement, bursttolerance, now);
+    let mut policer = contract::Contract::new().init(peakincrement, jittertolerance, sustainedincrement, bursttolerance, now);
     /**/
     harness::simulate(& mut shaper, & mut policer, burstsize, iterations);
 }

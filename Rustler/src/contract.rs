@@ -267,7 +267,7 @@ pub mod contract {
         }
        
         /// Allocate a new Contract object with zero values for all its fields.
-        pub fn new() -> Self {
+        pub fn new() -> Contract {
             Contract {
                 peak:       gcra::Gcra::new(),
                 sustained:  gcra::Gcra::new(),
@@ -280,7 +280,7 @@ pub mod contract {
         pub fn init(& mut self, peakincrement: ticks::Ticks, jittertolerance: ticks::Ticks, sustainedincrement: ticks::Ticks, bursttolerance: ticks::Ticks, now: ticks::Ticks) -> Self {
             self.peak.init(peakincrement, jittertolerance, now);
             self.sustained.init(sustainedincrement, bursttolerance, now);
-            return *self;
+            *self
         }
 
     }

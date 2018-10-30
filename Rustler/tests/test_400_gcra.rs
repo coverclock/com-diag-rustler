@@ -585,8 +585,8 @@ fn test_gcra_400_simulated() {
     let limit: ticks::Ticks = gcra::jittertolerance(increment, burstsize as throttle::Events);
     let iterations: usize = 1000000;
     let now: ticks::Ticks = ticks::now();
-    let mut shaper: gcra::Gcra = gcra::Gcra::new().init(increment, 0, now);
-    let mut policer: gcra::Gcra = gcra::Gcra::new().init(increment, limit, now);
+    let mut shaper = gcra::Gcra::new().init(increment, 0, now);
+    let mut policer = gcra::Gcra::new().init(increment, limit, now);
     /**/
     harness::simulate(& mut shaper, & mut policer, burstsize, iterations);
 }

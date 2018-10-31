@@ -123,10 +123,8 @@ pub fn simulate(shape: & mut throttle::Throttle, police: & mut throttle::Throttl
  * ACTUAL EVENT STREAM
  ******************************************************************************/
 
-use std::sync;
 use std::sync::mpsc;
 use std::net;
-use std::marker;
 use std::thread;
 use rustler::fletcher::fletcher;
 
@@ -158,22 +156,29 @@ fn producer(maximum: usize, mut limit: usize, output: & mpsc::SyncSender<u8>, re
             
             datum[0] = payload(b'~' - b' ' + 1) + b' ' - 1;
             checksum = cs.checksum(&datum[..]);
-            output.send(datum[0]);
+            match output.send(datum[0]) {
+                Ok(_) => { },
+                Err(_) => { panic!(); }
+            }
             size -= 1;
             
         }
 
         datum[0] = 0x00;
-        output.send(datum[0]);
+        match output.send(datum[0]) {
+            Ok(_) => { },
+            Err(_) => { panic!(); }
+        }
 
         ticks::sleep(0);
         
-    }
-    
+    }   
     drop(output);
     
-    results.send((total, checksum));
-    
+    match results.send((total, checksum)) {
+        Ok(_) => { },
+        Err(_) => { panic!(); }
+    }    
     drop(results);
     
     eprintln!("producer: end total={}B mean={}B/burst maximum={}B/burst.", total, (total as f64) / (count as f64), largest);
@@ -201,7 +206,7 @@ fn shaper(input: & mpsc::Receiver<u8>, shape: & mut throttle::Throttle, output: 
     
     before = ticks::now();
     
-    while true {
+    loop {
         
         now = ticks::now();
         delay = shape.request(now);
@@ -227,15 +232,13 @@ fn shaper(input: & mpsc::Receiver<u8>, shape: & mut throttle::Throttle, output: 
         }
         
         size = 0;
-        while true {
-            
+        loop {            
             match input.recv() {
                 Ok(value) => { buffer[size] = value; size+=1; },
                 Err(_) => { eof = true; }
             }
             if eof { break; }
-            if buffer[size] == 0x00 { break; }
-        
+            if buffer[size] == 0x00 { break; }        
         }
         if eof { break; }
         if size > largest { largest = size; }
@@ -285,7 +288,7 @@ fn policer(input: & net::UdpSocket, police: & mut throttle::Throttle, output: & 
     let after: ticks::Ticks;
     let mut now: ticks::Ticks = 0;
     let mut then: ticks::Ticks;
-    let mut size: usize = 0;
+    let mut size: usize;
     let mut count: usize = 0;
     let mut rate: f64;
     let mut peak: f64 = 0.0;
@@ -343,7 +346,10 @@ fn policer(input: & net::UdpSocket, police: & mut throttle::Throttle, output: & 
             
             index = 0;
             while index < size {
-                output.send(buffer[index]);
+                match output.send(buffer[index]) {
+                    Ok(_) => { },
+                    Err(_) => { panic!(); }
+                }
                 index += 1;
             }
             
@@ -362,10 +368,9 @@ fn policer(input: & net::UdpSocket, police: & mut throttle::Throttle, output: & 
         ticks::sleep(0);
         
     }
-    
-    after = ticks::now();
-    
     drop(output);
+   
+    after = ticks::now();
     
     let mean: f64 = (total as f64) / (count as f64);
     let sustained: f64 = (total as f64) * frequency / ((after - before) as f64);
@@ -383,7 +388,7 @@ fn consumer(maximum: usize, input: & mpsc::Receiver<u8>, results: & mpsc::Sender
    
     eprintln!("consumer: begin burstsize={}B", maximum);
     
-    while true {
+    loop {
 
         match input.recv() {
             Ok(value) => { datum[0] = value; total += 1; checksum = cs.checksum(&datum[..]); },
@@ -397,8 +402,10 @@ fn consumer(maximum: usize, input: & mpsc::Receiver<u8>, results: & mpsc::Sender
         
     }
     
-    results.send((total, checksum));
-    
+    match results.send((total, checksum)) {
+        Ok(_) => { },
+        Err(_) => { panic!(); }
+    }    
     drop(results);
     
     eprintln!("consumer: end total={}B", total);
@@ -407,10 +414,10 @@ fn consumer(maximum: usize, input: & mpsc::Receiver<u8>, results: & mpsc::Sender
 /// Exercise a shaping throttle and a policing throttle by producing an
 /// actual event stream, shaping it, policing it, and consuming it four threads.
 pub fn exercise(shape: & 'static mut throttle::Throttle, police: & 'static mut throttle::Throttle, maximum: usize, total: usize) {
-    let mut producertotal: usize = 1;
-    let mut producerchecksum: u16 = 2;
-    let mut consumertotal: usize = 3;
-    let mut consumerchecksum: u16 = 4;
+    let producertotal: usize;
+    let producerchecksum: u16;
+    let consumertotal: usize;
+    let consumerchecksum: u16;
     
     eprintln!("exercise: Beginning.");
 

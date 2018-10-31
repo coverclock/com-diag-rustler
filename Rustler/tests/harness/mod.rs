@@ -9,9 +9,6 @@
 extern crate rustler;
 
 use std::os::raw;
-use rustler::ticks::ticks;
-use rustler::throttle::throttle;
-use rustler::fletcher::fletcher;
 
 extern {
     /// rand(3) <stdlib.h> libc.
@@ -45,6 +42,9 @@ pub fn payload(maximum: u8) -> u8 {
 /*******************************************************************************
  * SIMULATED EVENT STREAM
  ******************************************************************************/
+
+use rustler::ticks::ticks;
+use rustler::throttle::throttle;
 
 /// Simulate a data stream through a shaping throttle and a policing throttle
 /// given a maximum blocksize value and a limit on iterations.
@@ -126,6 +126,7 @@ pub fn simulate(shape: & mut throttle::Throttle, police: & mut throttle::Throttl
 use std::sync;
 use std::sync::mpsc;
 use std::net;
+use rustler::fletcher::fletcher;
 
 const DEBUG: bool = true;
 
@@ -401,6 +402,7 @@ fn consumer(maximum: usize, input: & mpsc::Receiver<u8>, results: & mpsc::Sender
     eprintln!("consumer: end total={}B", total);
 }
 
+use std::marker;
 use std::thread;
 
 /*
@@ -436,24 +438,33 @@ pub fn exercise(shape: & mut throttle::Throttle, police: & mut throttle::Throttl
 
     match consuming.join() {
         Ok(_) => { },
-        Err(_) => { panic!(); }
+        Err(error) => { panic!(error); }
     }
     match policing.join() {
         Ok(_) => { },
-        Err(_) => { panic!(); }
+        Err(error) => { panic!(error); }
     }
     match shaping.join() {
         Ok(_) => { },
-        Err(_) => { panic!(); }
+        Err(error) => { panic!(error); }
     }
     match producing.join() {
         Ok(_) => { },
-        Err(_) => { panic!(); }
+        Err(error) => { panic!(error); }
     }
 
     eprintln!("exercise: Checking.");
     
+    match producer_rx.recv() {
+        Ok(value) => { producertotal = value.0; producerchecksum = value.1; },
+        Err(error) => { panic!(error); ) }
+    }
     eprintln!("exercise: produced={}:{:04x}.", producertotal, producerchecksum);
+ 
+    match consumer_rx.recv() {
+        Ok(value) => { consumertotal = value.0; consumerchecksum = value.1; },
+        Err(error) => { panic!(error)); }
+    }
     eprintln!("exercise: consumer={}:{:04x}.", consumertotal, consumerchecksum);
 
     assert!(consumertotal == producertotal);

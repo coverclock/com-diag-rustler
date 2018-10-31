@@ -123,12 +123,9 @@ pub fn simulate(shape: & mut throttle::Throttle, police: & mut throttle::Throttl
  * ACTUAL EVENT STREAM
  ******************************************************************************/
 
-/*
-
 use std::sync;
 use std::sync::mpsc;
 use std::net;
-use std::thread;
 
 const DEBUG: bool = true;
 
@@ -391,6 +388,8 @@ fn consumer(maximum: usize, input: & mpsc::Receiver<u8>, total: & mut usize, che
     
     eprintln!("consumer: end total={}B", *total);
 }
+
+/*
 
 /// Exercise a shaping throttle and a policing throttle by producing an
 /// actual event stream, shaping it, policing it, and consuming it four threads.

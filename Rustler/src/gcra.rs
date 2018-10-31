@@ -71,7 +71,9 @@ pub mod gcra {
     }
     
     impl marker::Copy for Gcra {
-        
+        /*
+         * Copyable (no pointers or heap data).
+         */        
     }
 
     impl clone::Clone for Gcra {
@@ -82,7 +84,7 @@ pub mod gcra {
 
     }
 
-    static SIZE_OF: usize = mem::size_of::<Gcra>();
+    static SIZE_OF: usize = mem::size_of::<Gcra>(); // Not actually a function call.
     
     fn btoc(b: bool) -> char { if b { return '1'; } else { return '0'; } }
     
@@ -103,10 +105,18 @@ pub mod gcra {
     impl throttle::Throttle for Gcra {
 
         /***************************************************************************
+         * INSPECTORS
+         **************************************************************************/
+
+        fn size_of(& self) -> usize {
+            SIZE_OF
+        }
+
+        /***************************************************************************
          * CONVERTORS
          **************************************************************************/
          
-        /// to_string returns the underlying object as a printable string.
+        /// as_string returns the underlying object as a printable string.
         fn as_string(& self) -> string::String {
             string::ToString::to_string(self)
         }
@@ -288,10 +298,6 @@ pub mod gcra {
     use throttle::throttle::Throttle; // For init(): self.reset(now) below.
 
     impl Gcra {
-        
-        pub fn size_of(& self) -> usize {
-            SIZE_OF
-        }
         
         /// Allocate a new Gcra object with zero values for all its fields.
         pub fn new() -> Gcra {

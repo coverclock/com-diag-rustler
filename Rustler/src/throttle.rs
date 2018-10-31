@@ -29,10 +29,18 @@ pub mod throttle {
     pub trait Throttle {
 
         /***************************************************************************
+         * INSPECTORS
+         **************************************************************************/
+       
+        fn size_of(& self) -> usize;
+
+        /***************************************************************************
          * CONVERTORS
          **************************************************************************/
          
-        /// to_string returns the underlying object as a printable string.
+        /// as_string returns the underlying object as a printable string. This
+        /// is equivalent to to_string but can be called from the trait without
+        /// having to know the actual super type or size_of.
         fn as_string(& self) -> string::String;
 
         /***************************************************************************

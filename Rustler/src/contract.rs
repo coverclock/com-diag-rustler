@@ -49,9 +49,11 @@ pub mod contract {
         peak:       gcra::Gcra,
         sustained:  gcra::Gcra,
     }
-    
-    impl marker::Copy for Contract {
-        
+
+    impl marker::Copy for Contract {       
+        /*
+         * Copyable (no pointers or heap data).
+         */        
     }
 
     impl clone::Clone for Contract {
@@ -62,7 +64,7 @@ pub mod contract {
 
     }
 
-    static SIZE_OF: usize = mem::size_of::<Contract>();
+    static SIZE_OF: usize = mem::size_of::<Contract>(); // Not actually a function call.
     
     impl string::ToString for Contract {
         
@@ -78,10 +80,18 @@ pub mod contract {
     impl throttle::Throttle for Contract {
 
         /***************************************************************************
+         * INSPECTORS
+         **************************************************************************/
+
+        fn size_of(& self) -> usize {
+            SIZE_OF
+        }
+
+        /***************************************************************************
          * CONVERTORS
          **************************************************************************/
          
-        /// to_string returns the underlying object as a printable string.
+        /// as_string returns the underlying object as a printable string.
         fn as_string(& self) -> string::String {
             string::ToString::to_string(self)
         }
@@ -261,10 +271,6 @@ pub mod contract {
     }
     
     impl Contract {
-         
-        pub fn size_of(& self) -> usize {
-            SIZE_OF
-        }
        
         /// Allocate a new Contract object with zero values for all its fields.
         pub fn new() -> Contract {

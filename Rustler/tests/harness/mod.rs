@@ -129,12 +129,14 @@ use std::net;
 
 const DEBUG: bool = true;
 
-fn producer(maximum: usize, mut limit: usize, output: & mpsc::SyncSender<u8>, total: & mut usize, checksum: & mut u16) {
+fn producer(maximum: usize, mut limit: usize, output: & mpsc::SyncSender<u8>, results: & mpsc::Sender<(usize, u16)>) {
     let mut count: usize = 0;
     let mut largest: usize = 0;
     let mut cs: fletcher::Fletcher = fletcher::Fletcher::new();
     let mut size: usize;
     let mut datum = [0u8; 1];
+    let mut total: usize = 0;
+    let mut checksum: u16 = 0;
     
     eprintln!("producer: begin burstsize={}B", maximum);
     
@@ -143,16 +145,16 @@ fn producer(maximum: usize, mut limit: usize, output: & mpsc::SyncSender<u8>, to
         size = blocksize(maximum as usize);
         if size > limit { size = limit }
         if size > largest { largest = size; }
-        *total += size;
+        total += size;
         limit -= size;
         count += 1;
             
-        if DEBUG { eprintln!("producer: size={}B total={}B maximum={}B/burst.", size, *total, largest); }
+        if DEBUG { eprintln!("producer: size={}B total={}B maximum={}B/burst.", size, total, largest); }
        
         while size > 0 {
             
             datum[0] = payload(b'~' - b' ' + 1) + b' ' - 1;
-            *checksum = cs.checksum(&datum[..]);
+            checksum = cs.checksum(&datum[..]);
             output.send(datum[0]);
             size -= 1;
             
@@ -167,7 +169,11 @@ fn producer(maximum: usize, mut limit: usize, output: & mpsc::SyncSender<u8>, to
     
     drop(output);
     
-    eprintln!("producer: end total={}B mean={}B/burst maximum={}B/burst.", *total, (*total as f64) / (count as f64), largest);
+    results.send((total, checksum));
+    
+    drop(results);
+    
+    eprintln!("producer: end total={}B mean={}B/burst maximum={}B/burst.", total, (total as f64) / (count as f64), largest);
 }
 
 fn shaper(input: & mpsc::Receiver<u8>, shape: & mut throttle::Throttle, output: & net::UdpSocket, address: & net::SocketAddrV4) {
@@ -365,29 +371,37 @@ fn policer(input: & net::UdpSocket, police: & mut throttle::Throttle, output: & 
     eprintln!("policer: end total={}B mean={}B/burst maximum={}B/burst peak={}B/s sustained={}B/s", total, mean, largest, peak, sustained);    
 }
 
-fn consumer(maximum: usize, input: & mpsc::Receiver<u8>, total: & mut usize, checksum: & mut u16) {
+fn consumer(maximum: usize, input: & mpsc::Receiver<u8>, results: & mpsc::Sender<(usize, u16)>) {
     let mut cs: fletcher::Fletcher = fletcher::Fletcher::new();
     let mut eof: bool = false;
     let mut datum = [0u8; 1];
-    
+    let mut total: usize = 0;
+    let mut checksum: u16 = 0;
+   
     eprintln!("consumer: begin burstsize={}B", maximum);
     
     while true {
 
         match input.recv() {
-            Ok(value) => { datum[0] = value; *total += 1; *checksum = cs.checksum(&datum[..]); },
+            Ok(value) => { datum[0] = value; total += 1; checksum = cs.checksum(&datum[..]); },
             Err(_) => { eof = true; }
         }
         if eof { break; }
 
-        if DEBUG && ((*total % maximum) == 0) { eprintln!("consumer: total={}B.", *total); }
+        if DEBUG && ((total % maximum) == 0) { eprintln!("consumer: total={}B.", total); }
         
         ticks::sleep(0);
         
     }
     
-    eprintln!("consumer: end total={}B", *total);
+    results.send((total, checksum));
+    
+    drop(results);
+    
+    eprintln!("consumer: end total={}B", total);
 }
+
+use std::thread;
 
 /*
 
@@ -404,16 +418,19 @@ pub fn exercise(shape: & mut throttle::Throttle, police: & mut throttle::Throttl
     let (supply_tx, supply_rx) = mpsc::sync_channel::<u8>(maximum + 1);
     let (demand_tx, demand_rx) = mpsc::channel::<u8>();
 
+    let (consumer_tx, consumer_rx) = mpsc::channel::<(usize, u16)>();
+    let (producer_tx, producer_rx) = mpsc::channel::<(usize, u16)>();
+
     let source = net::UdpSocket::bind("127.0.0.1:5555").expect("couldn't bind to address");
     let sink = net::UdpSocket::bind("127.0.0.1:0").expect("couldn't bind to address");
     let destination = net::SocketAddrV4::new(net::Ipv4Addr::new(127, 0, 0, 1), 5555);
        
     eprintln!("exercise: Starting.");
    
-    let consuming = thread::spawn( move || { consumer(maximum, & demand_rx, & mut consumertotal, & mut consumerchecksum) } );
+    let consuming = thread::spawn( move || { consumer(maximum, & demand_rx, & consumer_tx) } );
     let policing  = thread::spawn( move || { policer(& source, police, & demand_tx) } );
     let shaping   = thread::spawn( move || { shaper(& supply_rx, shape, & sink, & destination) } );
-    let producing = thread::spawn( move || { producer(maximum, total, & supply_tx, & mut producertotal, & mut producerchecksum) } );
+    let producing = thread::spawn( move || { producer(maximum, total, & supply_tx, & producer_tx) } );
     
     eprintln!("exercise: Waiting.");
 

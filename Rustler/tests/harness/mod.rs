@@ -457,13 +457,13 @@ pub fn exercise(shape: & mut throttle::Throttle, police: & mut throttle::Throttl
     
     match producer_rx.recv() {
         Ok(value) => { producertotal = value.0; producerchecksum = value.1; },
-        Err(error) => { panic!(error); ) }
+        Err(error) => { panic!(error); }
     }
     eprintln!("exercise: produced={}:{:04x}.", producertotal, producerchecksum);
  
     match consumer_rx.recv() {
         Ok(value) => { consumertotal = value.0; consumerchecksum = value.1; },
-        Err(error) => { panic!(error)); }
+        Err(error) => { panic!(error); }
     }
     eprintln!("exercise: consumer={}:{:04x}.", consumertotal, consumerchecksum);
 

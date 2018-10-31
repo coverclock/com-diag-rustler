@@ -16,6 +16,7 @@
 pub mod throttle {
 
     use std::string;
+    use std::marker;
     use ticks::ticks;
  
     /// Events is the type used to indicate how many events have been emitted since
@@ -26,7 +27,7 @@ pub mod throttle {
     pub type Events = i64;
     
     /// Throttle defines the standard API for rate limiting implementations.
-    pub trait Throttle {
+    pub trait Throttle : marker::Sync + marker::Send {
 
         /***************************************************************************
          * INSPECTORS

@@ -126,6 +126,8 @@ pub fn simulate(shape: & mut throttle::Throttle, police: & mut throttle::Throttl
 use std::sync;
 use std::sync::mpsc;
 use std::net;
+use std::marker;
+use std::thread;
 use rustler::fletcher::fletcher;
 
 const DEBUG: bool = true;
@@ -402,14 +404,9 @@ fn consumer(maximum: usize, input: & mpsc::Receiver<u8>, results: & mpsc::Sender
     eprintln!("consumer: end total={}B", total);
 }
 
-use std::marker;
-use std::thread;
-
-/*
-
 /// Exercise a shaping throttle and a policing throttle by producing an
 /// actual event stream, shaping it, policing it, and consuming it four threads.
-pub fn exercise(shape: & mut throttle::Throttle, police: & mut throttle::Throttle, maximum: usize, total: usize) {
+pub fn exercise(shape: & 'static mut throttle::Throttle, police: & 'static mut throttle::Throttle, maximum: usize, total: usize) {
     let mut producertotal: usize = 1;
     let mut producerchecksum: u16 = 2;
     let mut consumertotal: usize = 3;
@@ -473,5 +470,3 @@ pub fn exercise(shape: & mut throttle::Throttle, police: & mut throttle::Throttl
     eprintln!("exercise: Ending.");
 
 }
-
-*/

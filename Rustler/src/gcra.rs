@@ -144,26 +144,26 @@ pub mod gcra {
         /// Algorithm, the value returned may be the same as that returned by Request
         /// given the current state of the throttle, or some other value entirely.
         fn get_expected(& self) -> ticks::Ticks {
-            return self.expected;
+            self.expected
         }
         
         /// is_empty returns true if the throttle is empty, that is, it has no accumulated
         /// deficit ticks.
         fn is_empty(& self) -> bool {
-            return self.empty1;
+            self.empty1
         }
         
         /// is_full returns true if the throttle is full, that is, its accumulated deficit
         /// ticks is greater than or equal to its limit.
         fn is_full(& self) -> bool {
-            return self.full1;
+            self.full1
         }
         
         /// is_alarmed returns true if the throttle is alarmed, that is, its accumulated
         /// deficit ticks is greater than its limit, indicating that the event
         /// emission stream is out of compliance with the traffic contract.
         fn is_alarmed(& self) -> bool {
-            return self.alarmed1;
+            self.alarmed1
         }
 
         /***************************************************************************
@@ -172,7 +172,7 @@ pub mod gcra {
     
         /// emptied returns true if the throttle just emptied in the last action.
         fn emptied(& self) -> bool {
-            return self.empty1 && (!self.empty2)
+            self.empty1 && (!self.empty2)
         }
         
         /// filled returns true if the throttle just filled in the last action.
@@ -182,14 +182,14 @@ pub mod gcra {
         
         /// alarmed returns true if the throttle just alarmed in the last action.
         fn alarmed(& self) -> bool {
-            return self.alarmed1 && (!self.alarmed2);
+            self.alarmed1 && (!self.alarmed2)
         }
         
         /// cleared returns true if the throttle just unalarmed in the last action,
         /// indicating that the event emission stream has returned to being
         /// compliant with the traffic contract.
         fn cleared(& self) -> bool {
-            return (!self.alarmed1) && self.alarmed2;
+            (!self.alarmed1) && self.alarmed2
         }
         
         /***************************************************************************
@@ -223,7 +223,7 @@ pub mod gcra {
                 }
             }
             
-            return delay;
+            delay
         }
         
         /// commits updates the throttle with the number of events having been emitted
@@ -253,7 +253,7 @@ pub mod gcra {
                 // Do nothing.
             }
 
-            return !self.alarmed1;
+            !self.alarmed1
         }
             
         /// commit is equivalent to calling Commits with one event.
@@ -361,7 +361,7 @@ pub mod gcra {
             increment += 1;
         }
         
-        return increment;
+        increment
     }
     
     /// Compute a jitter tolerance in ticks given an increment in ticks and a
@@ -377,7 +377,7 @@ pub mod gcra {
             limit = (burstsize - 1) * increment;
         }
         
-        return limit;
+        limit
     }
 
 }

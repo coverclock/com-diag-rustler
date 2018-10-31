@@ -45,7 +45,7 @@ pub mod ticks {
             ticks *= frequency();
             ticks += nanoseconds as i64;
             
-            return ticks;
+            ticks
         }
     }
 

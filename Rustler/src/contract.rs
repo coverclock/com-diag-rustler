@@ -119,7 +119,7 @@ pub mod contract {
                 delay = sustained;
             }
             
-            return delay;
+            delay
         }
         
         /// is_empty returns true if the throttle is empty, that is, it has no accumulated
@@ -128,7 +128,7 @@ pub mod contract {
             let peak: bool = self.peak.is_empty();
             let sustained: bool = self.sustained.is_empty();
             
-            return peak && sustained;
+            peak && sustained
         }
         
         /// is_full returns true if the throttle is full, that is, its accumulated deficit
@@ -137,7 +137,7 @@ pub mod contract {
             let peak: bool = self.peak.is_full();
             let sustained: bool = self.sustained.is_full();
             
-            return peak || sustained;
+            peak || sustained
         }
         
         /// is_alarmed returns true if the throttle is alarmed, that is, its accumulated
@@ -147,7 +147,7 @@ pub mod contract {
             let peak: bool = self.peak.is_alarmed();
             let sustained: bool = self.sustained.is_alarmed();
             
-            return peak || sustained;
+            peak || sustained
         }
 
         /***************************************************************************
@@ -159,7 +159,7 @@ pub mod contract {
             let peak: bool = self.peak.emptied();
             let sustained: bool = self.sustained.emptied();
             
-            return peak || sustained;
+            peak || sustained
         }
         
         /// filled returns true if the throttle just filled in the last action.
@@ -167,7 +167,7 @@ pub mod contract {
             let peak: bool = self.peak.filled();
             let sustained: bool = self.sustained.filled();
             
-            return peak || sustained;
+            peak || sustained
         }
         
         /// alarmed returns true if the throttle just alarmed in the last action.
@@ -175,7 +175,7 @@ pub mod contract {
             let peak: bool = self.peak.alarmed();
             let sustained: bool = self.sustained.alarmed();
             
-            return peak || sustained;
+            peak || sustained
         }
         
         /// cleared returns true if the throttle just unalarmed in the last action,
@@ -185,7 +185,7 @@ pub mod contract {
             let peak: bool = self.peak.cleared();
             let sustained: bool = self.sustained.cleared();
             
-            return peak || sustained;
+            peak || sustained
         }
         
         /***************************************************************************
@@ -206,7 +206,7 @@ pub mod contract {
                 delay = sustained;
             }
             
-            return delay;
+            delay
         }
         
         /// commits updates the throttle with the number of events having been emitted
@@ -217,7 +217,7 @@ pub mod contract {
             let peak: bool = self.peak.commits(events);
             let sustained: bool = self.sustained.commits(events);
             
-            return peak && sustained;
+            peak && sustained
         }
             
         /// commit is equivalent to calling Commits with one event.
@@ -225,7 +225,7 @@ pub mod contract {
             let peak: bool = self.peak.commit();
             let sustained: bool = self.sustained.commit();
             
-            return peak && sustained;
+            peak && sustained
         }
         
         /// admits combines calling Request with the current time in ticks with
@@ -234,7 +234,7 @@ pub mod contract {
             let peak: bool = self.peak.admits(now, events);
             let sustained: bool = self.sustained.admits(now, events);
             
-            return peak && sustained;
+            peak && sustained
         }
         
         /// admit is equivalent to calling Admits with one event.
@@ -242,7 +242,7 @@ pub mod contract {
             let peak: bool = self.peak.admit(now);
             let sustained: bool = self.sustained.admit(now);
             
-            return peak && sustained;
+            peak && sustained
         }
         
         /// update is equivalent to calling Admits with zero events. It is a way to
@@ -255,7 +255,7 @@ pub mod contract {
             let peak: bool = self.peak.update(now);
             let sustained: bool = self.sustained.update(now);
             
-            return peak && sustained;
+            peak && sustained
         }
    
     }
@@ -299,7 +299,7 @@ pub mod contract {
             limit += (burstsize - 1) * (sustainedincrement - peakincrement);
         }
         
-        return limit;
+        limit
     }
 
 }

@@ -93,7 +93,7 @@ pub mod fletcher {
             c <<= 8;
             c |= a;
             
-            return c;
+            c
         }
         
     }

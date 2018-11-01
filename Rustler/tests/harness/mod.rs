@@ -15,6 +15,10 @@ extern {
     fn rand() -> raw::c_int;
 }
 
+/*******************************************************************************
+ * HELPERS
+ ******************************************************************************/
+
 /// Compute a random blocksize between the values 1 and maximum inclusive.
 pub fn blocksize(maximum: usize) -> usize {
     unsafe {
@@ -39,6 +43,11 @@ pub fn payload(maximum: u8) -> u8 {
     }
 }
 
+/// Return the absolute value of a 64-bit float.
+pub fn fabs(value: f64) -> f64 {
+    if value < 0.0 { return -value; } else { return value; }
+}
+
 /*******************************************************************************
  * SIMULATED EVENT STREAM
  ******************************************************************************/
@@ -47,8 +56,9 @@ use rustler::ticks::ticks;
 use rustler::throttle::throttle;
 
 /// Simulate a data stream through a shaping throttle and a policing throttle
-/// given a maximum blocksize value and a limit on iterations.
-pub fn simulate(shape: & mut throttle::Throttle, police: & mut throttle::Throttle, maximum: usize, iterations: usize) {
+/// given a maximum blocksize value and a limit on iterations. Returns the
+/// peak and sustained rates as a tuple.
+pub fn simulate(shape: & mut throttle::Throttle, police: & mut throttle::Throttle, maximum: usize, iterations: usize) -> (f64, f64) {
     let frequency: f64 = ticks::frequency() as f64;
     let mut delay: ticks::Ticks;
     let mut now: ticks::Ticks = 0;
@@ -117,6 +127,8 @@ pub fn simulate(shape: & mut throttle::Throttle, police: & mut throttle::Throttl
     eprintln!("simulate: shape={}", shape.as_string());
     eprintln!("simulate: police={}", police.as_string());
     eprintln!("simulate: total={}B mean={}B/io maximum={}B/io latency={}s/io peak={}B/s sustained={}B/s.", total, average, maximum, mean, peak, sustained);
+    
+    (peak, sustained)
 }
 
 /*******************************************************************************

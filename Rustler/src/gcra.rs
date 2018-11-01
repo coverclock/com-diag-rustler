@@ -70,6 +70,23 @@ pub mod gcra {
         alarmed2:   bool,                // The gcra was alarmed.
     }
     
+    pub const GCRA: Gcra = Gcra {
+        now:        0,
+        then:       0,
+        increment:  0,
+        limit:      0,
+        expected:   0,
+        deficit:    0,
+        full0:      false,
+        full1:      false,
+        full2:      false,
+        empty0:     false,
+        empty1:     false,
+        empty2:     false,
+        alarmed1:   false,
+        alarmed2:   false,
+    };
+    
     impl marker::Copy for Gcra {
         /*
          * Copyable (no pointers or heap data).
@@ -84,7 +101,7 @@ pub mod gcra {
 
     }
 
-    static SIZE_OF: usize = mem::size_of::<Gcra>(); // Not actually a function call.
+    pub static SIZE_OF_GCRA: usize = mem::size_of::<Gcra>(); // Not actually a function call.
     
     fn btoc(b: bool) -> char { if b { return '1'; } else { return '0'; } }
     
@@ -92,7 +109,7 @@ pub mod gcra {
       
         fn to_string(& self) -> string::String {
             format!("Gcra@{:p}[{}]:{{t:{},i:{},l:{},x:{},x1:{},f:{{{},{},{}}},e:{{{},{},{}}},a:{{{},{}}}}}",
-                self, SIZE_OF,
+                self, SIZE_OF_GCRA,
                 self.now - self.then,
                 self.increment, self.limit, self.expected, self.deficit,
                 btoc(self.full0), btoc(self.full1), btoc(self.full2),
@@ -108,8 +125,9 @@ pub mod gcra {
          * INSPECTORS
          **************************************************************************/
 
+        /// size_of returns the size of a Gcra structure in bytes.
         fn size_of(& self) -> usize {
-            SIZE_OF
+            SIZE_OF_GCRA
         }
 
         /***************************************************************************
@@ -301,22 +319,8 @@ pub mod gcra {
         
         /// Allocate a new Gcra object with zero values for all its fields.
         pub fn new() -> Gcra {
-            Gcra {
-                now:        0,
-                then:       0,
-                increment:  0,
-                limit:      0,
-                expected:   0,
-                deficit:    0,
-                full0:      false,
-                full1:      false,
-                full2:      false,
-                empty0:     false,
-                empty1:     false,
-                empty2:     false,
-                alarmed1:   false,
-                alarmed2:   false,
-            }
+            let that = GCRA;
+            that
         }
          
         /// Initialize a Gcra object given an increment and limit in ticks,

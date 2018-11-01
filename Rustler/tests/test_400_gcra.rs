@@ -16,6 +16,14 @@ use rustler::gcra::gcra;
 mod harness;
 
 #[test]
+fn test_gcra_050_sanity() {
+    let mut this: gcra::Gcra = gcra::GCRA;
+    this.init(1, 2, 3);
+    this.reset(4);
+    assert!(gcra::SIZE_OF_GCRA == this.size_of());
+}
+
+#[test]
 fn test_gcra_100_increment() {
     assert!(gcra::increment(2, 1, 4) == 2);
     assert!(gcra::increment(1, 2, 4) == 8);
@@ -604,11 +612,13 @@ fn test_gcra_400_simulated() {
     let mut shaper = gcra::Gcra::new().init(increment, 0, now);
     let mut policer = gcra::Gcra::new().init(increment, limit, now);
     /**/
-    harness::simulate(& mut shaper, & mut policer, burstsize, iterations);
+    let pair = harness::simulate(& mut shaper, & mut policer, burstsize, iterations);
+    /**/
+    assert!(harness::fabs(pair.0 - 1024.0) < (1024.0 / 100.0));
+    assert!(harness::fabs(pair.1 - 1024.0) < (1024.0 / 100.0));
 }
 
 /*
-
 #[test]
 fn test_gcra_500_exercised() {
     let frequency: ticks::Ticks = ticks::frequency();
@@ -617,7 +627,7 @@ fn test_gcra_500_exercised() {
     let limit: ticks::Ticks = gcra::jittertolerance(increment, burstsize as throttle::Events);
     let total: usize = 512 * 60;
     let now: ticks::Ticks = ticks::now();
-    static mut shaper: Option<& mut gcra::Gcra> = None;
+    static mut shape: Option<& mut gcra::Gcra> = None;
     static mut policer: Option<& mut gcra::Gcra> = None;
     // THIS IS NOT RIGHT: still trying to figure out the right way to do this.
     unsafe {

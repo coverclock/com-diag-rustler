@@ -17,6 +17,14 @@ use rustler::contract::contract;
 mod harness;
 
 #[test]
+fn test_contract_050_sanity() {
+    let mut this: contract::Contract = contract::CONTRACT;
+    this.init(1, 2, 3, 4, 5);
+    this.reset(6);
+    assert!(contract::SIZE_OF_CONTRACT == this.size_of());
+}
+
+#[test]
 fn test_contract_220_copy() {
     let mut original: contract::Contract = contract::Contract::new().init(2, 4, 6, 8, 10);
     println!("O1={}", original.to_string());
@@ -57,5 +65,8 @@ fn test_contract_400_simulated() {
     let mut shaper = contract::Contract::new().init(peakincrement, 0, sustainedincrement, bursttolerance, now);
     let mut policer = contract::Contract::new().init(peakincrement, jittertolerance, sustainedincrement, bursttolerance, now);
     /**/
-    harness::simulate(& mut shaper, & mut policer, burstsize, iterations);
+    let pair = harness::simulate(& mut shaper, & mut policer, burstsize, iterations);
+    /**/
+    assert!(harness::fabs(pair.0 - 2048.0) < (2048.0 / 100.0));
+    assert!(harness::fabs(pair.1 - 1024.0) < (1024.0 / 100.0));
 }

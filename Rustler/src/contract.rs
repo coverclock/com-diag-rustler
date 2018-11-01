@@ -49,6 +49,11 @@ pub mod contract {
         peak:       gcra::Gcra,
         sustained:  gcra::Gcra,
     }
+    
+    pub const CONTRACT: Contract = Contract {
+        peak:       gcra::GCRA,
+        sustained:  gcra::GCRA,
+    };
 
     impl marker::Copy for Contract {       
         /*
@@ -64,13 +69,13 @@ pub mod contract {
 
     }
 
-    static SIZE_OF: usize = mem::size_of::<Contract>(); // Not actually a function call.
+    pub static SIZE_OF_CONTRACT: usize = mem::size_of::<Contract>(); // Not actually a function call.
     
     impl string::ToString for Contract {
         
         fn to_string(& self) -> string::String {
             format!("Contract@{:p}[{}]:{{p:{},s:{}}}",
-                self, SIZE_OF,
+                self, SIZE_OF_CONTRACT,
                 self.peak.to_string(),
                 self.sustained.to_string())
         }
@@ -83,8 +88,9 @@ pub mod contract {
          * INSPECTORS
          **************************************************************************/
 
+        /// size_of returns the size of a Contract structure in bytes.
         fn size_of(& self) -> usize {
-            SIZE_OF
+            SIZE_OF_CONTRACT
         }
 
         /***************************************************************************
@@ -274,10 +280,8 @@ pub mod contract {
        
         /// Allocate a new Contract object with zero values for all its fields.
         pub fn new() -> Contract {
-            Contract {
-                peak:       gcra::Gcra::new(),
-                sustained:  gcra::Gcra::new(),
-            }
+            let that = CONTRACT;
+            that
         }
          
         /// Initialize a Contract object given an peak increment and jitter

@@ -612,11 +612,12 @@ fn test_gcra_400_simulated() {
     let mut shaper = gcra::Gcra::new().init(increment, 0, now);
     let mut policer = gcra::Gcra::new().init(increment, limit, now);
     /**/
-    let pair = harness::simulate(& mut shaper, & mut policer, burstsize, iterations);
+    let result = harness::simulate(& mut shaper, & mut policer, burstsize, iterations);
     /**/
-    assert!(harness::fabs(pair.0 - 1024.0) < (1024.0 / 100.0));
-    assert!(harness::fabs(pair.1 - 1024.0) < (1024.0 / 100.0));
+    assert!(harness::fabs(result.0 - 1024.0) < (1024.0 / 100.0));
+    assert!(harness::fabs(result.1 - 1024.0) < (1024.0 / 100.0));
 }
+
 /*
 
 #[test]
@@ -627,15 +628,13 @@ fn test_gcra_500_exercised() {
     let limit: ticks::Ticks = gcra::jittertolerance(increment, burstsize as throttle::Events);
     let total: usize = 512 * 60;
     let now: ticks::Ticks = ticks::now();
-    static mut shape: gcra::Gcra = gcra::GCRA;
-    static mut police: gcra::Gcra = gcra::GCRA;
-    static mut ss: & mut throttle::Throttle = & mut shape;
-    static mut pp: & mut throttle::Throttle = & mut police;
+    let mut shape: gcra::Gcra = gcra::Gcra::new().init(increment, 0, now);
+    let mut police: gcra::Gcra = gcra::Gcra::new().init(increment, limit, now);
     /**/
-    shape.init(increment, 0, now);
-    police.init(increment, limit, now);
+    let result = harness::exercise(ss, pp, burstsize, total);
     /**/
-    harness::exercise(ss, pp, burstsize, total);
+    assert!(result.0 == 0);
+    assert!(result.1 == 0);
 }
 
 #[test]

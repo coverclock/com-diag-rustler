@@ -425,7 +425,9 @@ fn consumer(maximum: usize, input: & mpsc::Receiver<u8>, results: & mpsc::Sender
 
 /// Exercise a shaping throttle and a policing throttle by producing an
 /// actual event stream, shaping it, policing it, and consuming it four threads.
-pub fn exercise(shape: & 'static mut throttle::Throttle, police: & 'static mut throttle::Throttle, maximum: usize, total: usize) {
+/// Returns the difference in the total byte counts and the checksums between
+/// the producer and the consumer threads.
+pub fn exercise(shape: & 'static mut throttle::Throttle, police: & 'static mut throttle::Throttle, maximum: usize, total: usize) -> (i64, i64) {
     let producertotal: usize;
     let producerchecksum: u16;
     let consumertotal: usize;
@@ -485,7 +487,6 @@ pub fn exercise(shape: & 'static mut throttle::Throttle, police: & 'static mut t
         Err(error) => { panic!(error); }
     }
     eprintln!("exercise: consumer={}:{:04x}.", consumertotal, consumerchecksum);
-
-    assert!(consumertotal == producertotal);
-    assert!(consumerchecksum == producerchecksum);
+    
+    (((consumertotal- producertotal) as i64), ((consumerchecksum - producerchecksum) as i64))
 }

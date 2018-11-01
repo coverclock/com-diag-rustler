@@ -124,9 +124,9 @@ pub fn simulate(shape: & mut throttle::Throttle, police: & mut throttle::Throttl
     let mean: f64 = seconds / (iterations as f64);
     let sustained: f64 = (total as f64) * frequency / (duration as f64);
 
+    eprintln!("simulate: total={}B mean={}B/io maximum={}B/io latency={}s/io peak={}B/s sustained={}B/s.", total, average, maximum, mean, peak, sustained);
     eprintln!("simulate: shape={}", shape.as_string());
     eprintln!("simulate: police={}", police.as_string());
-    eprintln!("simulate: total={}B mean={}B/io maximum={}B/io latency={}s/io peak={}B/s sustained={}B/s.", total, average, maximum, mean, peak, sustained);
     
     (peak, sustained)
 }
@@ -431,7 +431,10 @@ pub fn exercise(shape: & 'static mut throttle::Throttle, police: & 'static mut t
     let consumertotal: usize;
     let consumerchecksum: u16;
     
-    eprintln!("exercise: Beginning.");
+    eprintln!("exercise: shape={}", shape.as_string());
+    eprintln!("exercise: police={}", police.as_string());
+    eprintln!("exercise: maximum={}", maximum);
+    eprintln!("exercise: total={}", total);
 
     let (supply_tx, supply_rx) = mpsc::sync_channel::<u8>(maximum + 1);
     let (demand_tx, demand_rx) = mpsc::channel::<u8>();
@@ -443,14 +446,14 @@ pub fn exercise(shape: & 'static mut throttle::Throttle, police: & 'static mut t
     let sink = net::UdpSocket::bind("127.0.0.1:0").expect("couldn't bind to address");
     let destination = net::SocketAddrV4::new(net::Ipv4Addr::new(127, 0, 0, 1), 5555);
        
-    eprintln!("exercise: Starting.");
+    eprintln!("exercise: Spawning.");
    
     let consuming = thread::spawn( move || { consumer(maximum, & demand_rx, & consumer_tx) } );
     let policing  = thread::spawn( move || { policer(& source, police, & demand_tx) } );
     let shaping   = thread::spawn( move || { shaper(& supply_rx, shape, & sink, & destination) } );
     let producing = thread::spawn( move || { producer(maximum, total, & supply_tx, & producer_tx) } );
     
-    eprintln!("exercise: Waiting.");
+    eprintln!("exercise: Joining.");
 
     match consuming.join() {
         Ok(_) => { },
@@ -485,7 +488,4 @@ pub fn exercise(shape: & 'static mut throttle::Throttle, police: & 'static mut t
 
     assert!(consumertotal == producertotal);
     assert!(consumerchecksum == producerchecksum);
-    
-    eprintln!("exercise: Ending.");
-
 }

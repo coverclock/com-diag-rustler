@@ -140,7 +140,7 @@ use std::net;
 use std::thread;
 use rustler::fletcher::fletcher;
 
-const DEBUG: bool = true;
+const DEBUG: bool = false;
 
 fn producer(maximum: usize, mut limit: usize, output: & mpsc::SyncSender<u8>, results: & mpsc::Sender<(usize, u16)>) {
     let mut count: usize = 0;
@@ -214,7 +214,7 @@ fn shaper(input: & mpsc::Receiver<u8>, shape: & mut throttle::Throttle, output: 
     let mut alarmed: bool;
     let mut total: usize = 0;
     
-    eprintln!("shaper: begin");
+    eprintln!("shaper: begin.");
     
     before = ticks::now();
     
@@ -267,7 +267,9 @@ fn shaper(input: & mpsc::Receiver<u8>, shape: & mut throttle::Throttle, output: 
         count += 1;
        
         if DEBUG { eprintln!("shaper: size={}B total={}B maximum={}B/burst.", size, total, largest); }
-        
+
+        ticks::sleep(0);
+
     }
     
     now = ticks::now();
@@ -312,7 +314,7 @@ fn policer(input: & net::UdpSocket, police: & mut throttle::Throttle, output: & 
     let mut policed: usize = 0;
     let mut index: usize;
     
-    eprintln!("policer: start");
+    eprintln!("policer: begin.");
     
     before = ticks::now();
     
@@ -388,7 +390,7 @@ fn policer(input: & net::UdpSocket, police: & mut throttle::Throttle, output: & 
     let mean: f64 = (total as f64) / (count as f64);
     let sustained: f64 = (total as f64) * frequency / ((after - before) as f64);
     
-    eprintln!("policer: count={} admitted={} policed={}", count, admitted, policed);
+    eprintln!("policer: count={} admitted={} policed={}.", count, admitted, policed);
     eprintln!("policer: end total={}B mean={}B/burst maximum={}B/burst peak={}B/s sustained={}B/s.", total, mean, largest, peak, sustained);    
 }
 

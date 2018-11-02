@@ -188,6 +188,8 @@ Valgrind works just fine with Rust, unlike my experience with Go.
 
 ## Notes
 
+### Functional Test Output
+
 Here is a cut and paste of the output of one of the functional tests.
 
     $ dd if=/dev/urandom count=1000 | ./target/debug/fletch -V -b 512 | ./target/debug/shape -V -p 2048 -s 1024 -b 512 | ./target/debug/fletch -V -b 512 > /dev/null
@@ -209,3 +211,8 @@ Here is a cut and paste of the output of one of the functional tests.
     Peak: 4913958.297759311Bps.
     Sustained: 1023.9944224969396Bps.
     Checksum: 0x9c87.
+
+### usize
+
+Note that on X86_64 sizeof(size_t)==8, while on ARMv7 sizeof(size_t)==4. That
+means on the former, Rust usize is 8 bytes, but on the latter its 4 bytes.

@@ -23,7 +23,7 @@ fn main() {
     let before: ticks::Ticks;
     let after: ticks::Ticks;
     let mut cs: fletcher::Fletcher = fletcher::Fletcher::new();
-    let mut total: usize = 0;
+    let mut total: u64 = 0;
     let mut peak: f64 = 0.0;
     let mut count: usize = 0;
     let mut now: ticks::Ticks = 0;
@@ -101,7 +101,7 @@ fn main() {
         }
         if debug { eprintln!("Written: {}", length); }
 
-        total += length as usize;
+        total += length as u64;
         count += 1;
         
     }

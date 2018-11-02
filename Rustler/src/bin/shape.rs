@@ -26,7 +26,7 @@ fn main() {
     let before: ticks::Ticks;
     let after: ticks::Ticks;
     let mut shape: contract::Contract = contract::Contract::new();
-    let mut total: usize = 0;
+    let mut total: u64 = 0;
     let mut peak: f64 = 0.0;
     let mut count: usize = 0;
     let mut now: ticks::Ticks;
@@ -142,7 +142,7 @@ fn main() {
             }
         }
 
-        total += length as usize;
+        total += length as u64;
         count += 1;
         
     }

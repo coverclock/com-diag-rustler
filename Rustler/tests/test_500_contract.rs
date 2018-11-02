@@ -70,3 +70,24 @@ fn test_contract_400_simulated() {
     assert!(harness::fabs(pair.0 - 2048.0) < (2048.0 / 100.0));
     assert!(harness::fabs(pair.1 - 1024.0) < (1024.0 / 100.0));
 }
+
+/*
+#[test]
+fn test_contract_500_exercised() {
+    let frequency: ticks::Ticks = ticks::frequency();
+    let peakincrement: ticks::Ticks = gcra::increment(1024, 1, frequency);
+    let burstsize: usize = 64;
+    let jittertolerance: ticks::Ticks = gcra::jittertolerance(peakincrement, burstsize as throttle::Events);
+    let sustainedincrement: ticks::Ticks = gcra::increment(512, 1, frequency);
+    let bursttolerance: ticks::Ticks = contract::bursttolerance(peakincrement, 0, sustainedincrement, burstsize as throttle::Events);
+    let total: usize = 512 * 60;
+    let now: ticks::Ticks = ticks::now();
+    let shape: gcra::Gcra = gcra::Contract::new().init(peakincrement, 0, sustainedincrement, bursttolerance, now);
+    let police: gcra::Gcra = gcra::Contract::new().init(peakincrement, jittertolerance, sustainedincrement, bursttolerance, now);
+    /**/
+    let result = harness::exercise(& shape, & police, burstsize, total);
+    /**/
+    assert!(result.0 == 0);
+    assert!(result.1 == 0);
+}
+*/

@@ -611,14 +611,12 @@ fn test_gcra_400_simulated() {
     let now: ticks::Ticks = ticks::now();
     let mut shaper = gcra::Gcra::new().init(increment, 0, now);
     let mut policer = gcra::Gcra::new().init(increment, limit, now);
-    /**/
     let result = harness::simulate(& mut shaper, & mut policer, burstsize, iterations);
-    /**/
     assert!(harness::fabs(result.0 - 1024.0) < (1024.0 / 100.0));
     assert!(harness::fabs(result.1 - 1024.0) < (1024.0 / 100.0));
 }
 
-/*
+use std::sync;
 
 #[test]
 fn test_gcra_500_exercised() {
@@ -629,14 +627,17 @@ fn test_gcra_500_exercised() {
     let total: usize = 512 * 60;
     let now: ticks::Ticks = ticks::now();
     let mut shape: gcra::Gcra = gcra::Gcra::new().init(increment, 0, now);
+    let mshape: sync::Mutex<gcra::Gcra> = sync::Mutex::new(shape);
+    let amshape: sync::Arc<sync::Mutex<gcra::Gcra>> = sync::Arc::new(mshape);
     let mut police: gcra::Gcra = gcra::Gcra::new().init(increment, limit, now);
-    /**/
-    let result = harness::exercise(ss, pp, burstsize, total);
-    /**/
+    let mpolice: sync::Mutex<gcra::Gcra> = sync::Mutex::new(police);
+    let ampolice: sync::Arc<sync::Mutex<gcra::Gcra>> = sync::Arc::new(mpolice);
+    let result = harness::exercise_gcra(amshape, ampolice, burstsize, total);
     assert!(result.0 == 0);
     assert!(result.1 == 0);
 }
 
+/*
 #[test]
 fn test_gcra_600_exercised() {
     let frequency: ticks::Ticks = ticks::frequency();
@@ -645,25 +646,14 @@ fn test_gcra_600_exercised() {
     let limit: ticks::Ticks = gcra::jittertolerance(increment, burstsize as throttle::Events);
     let total: usize = 1024 * 60;
     let now: ticks::Ticks = ticks::now();
-    static mut shaper: Option<gcra::Gcra> = None;
-    static mut policer: Option<gcra::Gcra> = None;
-    // THIS IS NOT RIGHT: still trying to figure out the right way to do this.
-    unsafe {
-    /**/
-    eprintln!("shaper={}", shaper.to_string());
-    eprintln!("policer={}", policer.to_string());
-    /**/
-    shaper.init(increment, 0, now);
-    policer.init(increment, limit, now);
-    /**/
-    eprintln!("shaper={}", shaper.to_string());
-    eprintln!("policer={}", policer.to_string());
-    /**/
-    harness::exercise(& mut shaper, & mut policer, burstsize, total);
-    /**/
-    eprintln!("shaper={}", shaper.to_string());
-    eprintln!("policer={}", policer.to_string());
-    }
+    let mut shape: gcra::Gcra = gcra::Gcra::new().init(increment, 0, now);
+    let mut police: gcra::Gcra = gcra::Gcra::new().init(increment, limit, now);
+    let mshape: sync::Mutex<gcra::Gcra> = sync::Mutex::new(shape);
+    let mpolice: sync::Mutex<gcra::Gcra> = sync::Mutex::new(police);
+    let amshape: sync::Arc<sync::Mutex<gcra::Gcra>> = sync::Arc::new(mshape);
+    let ampolice: sync::Arc<sync::Mutex<gcra::Gcra>> = sync::Arc::new(mpolice);
+    let result = harness::exercise_gcra(amshape, ampolice, burstsize, total);
+    assert!(result.0 == 0);
+    assert!(result.1 == 0);
 }
-
 */

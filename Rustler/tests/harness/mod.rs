@@ -423,18 +423,19 @@ fn consumer(maximum: usize, input: & mpsc::Receiver<u8>, results: & mpsc::Sender
     eprintln!("consumer: end total={}B", total);
 }
 
+use std::sync;
+use rustler::gcra::gcra;
+
 /// Exercise a shaping throttle and a policing throttle by producing an
 /// actual event stream, shaping it, policing it, and consuming it four threads.
 /// Returns the difference in the total byte counts and the checksums between
 /// the producer and the consumer threads.
-pub fn exercise(shape: & 'static mut throttle::Throttle, police: & 'static mut throttle::Throttle, maximum: usize, total: usize) -> (i64, i64) {
+pub fn exercise_gcra(shape: sync::Arc<sync::Mutex<gcra::Gcra>>, police: sync::Arc<sync::Mutex<gcra::Gcra>>, maximum: usize, total: usize) -> (i64, i64) {
     let producertotal: usize;
     let producerchecksum: u16;
     let consumertotal: usize;
     let consumerchecksum: u16;
     
-    eprintln!("exercise: shape={}", shape.as_string());
-    eprintln!("exercise: police={}", police.as_string());
     eprintln!("exercise: maximum={}", maximum);
     eprintln!("exercise: total={}", total);
 
@@ -450,10 +451,23 @@ pub fn exercise(shape: & 'static mut throttle::Throttle, police: & 'static mut t
        
     eprintln!("exercise: Spawning.");
    
-    let consuming = thread::spawn( move || { consumer(maximum, & demand_rx, & consumer_tx) } );
-    let policing  = thread::spawn( move || { policer(& source, police, & demand_tx) } );
-    let shaping   = thread::spawn( move || { shaper(& supply_rx, shape, & sink, & destination) } );
-    let producing = thread::spawn( move || { producer(maximum, total, & supply_tx, & producer_tx) } );
+    let consuming = thread::spawn( move || {
+        consumer(maximum, & demand_rx, & consumer_tx)
+    } );
+
+    let policing  = thread::spawn( move || {
+        let mut throttle: gcra::Gcra = *police.lock().unwrap();
+        policer(& source, & mut throttle, & demand_tx)
+    } );
+
+    let shaping   = thread::spawn( move || {
+        let mut throttle: gcra::Gcra = *shape.lock().unwrap();
+        shaper(& supply_rx, & mut throttle, & sink, & destination)
+    } );
+
+    let producing = thread::spawn( move || {
+        producer(maximum, total, & supply_tx, & producer_tx)
+    } );
     
     eprintln!("exercise: Joining.");
 

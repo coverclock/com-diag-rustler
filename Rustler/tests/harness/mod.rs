@@ -64,7 +64,7 @@ pub fn simulate(shape: & mut throttle::Throttle, police: & mut throttle::Throttl
     let mut now: ticks::Ticks = 0;
     let mut duration: ticks::Ticks = 0;
     let mut size: usize = 0;
-    let mut total: usize = 0;
+    let mut total: u64 = 0;
     let mut rate: f64;
     let mut peak: f64 = 0.0;
     let mut admissable: bool;
@@ -99,7 +99,7 @@ pub fn simulate(shape: & mut throttle::Throttle, police: & mut throttle::Throttl
         size = blocksize(maximum);
         assert!(size > 0);
         assert!(size <= maximum);
-        total += size;
+        total += size as u64;
         
         admissable = shape.commits(size as throttle::Events);
         assert!(admissable);
@@ -142,13 +142,13 @@ use rustler::fletcher::fletcher;
 
 const DEBUG: bool = false;
 
-fn producer(maximum: usize, mut limit: usize, output: & mpsc::SyncSender<u8>, results: & mpsc::Sender<(usize, u16)>) {
+fn producer(maximum: usize, mut limit: u64, output: & mpsc::SyncSender<u8>, results: & mpsc::Sender<(u64, u16)>) {
     let mut count: usize = 0;
     let mut largest: usize = 0;
     let mut cs: fletcher::Fletcher = fletcher::Fletcher::new();
     let mut size: usize;
     let mut datum = [0u8; 1];
-    let mut total: usize = 0;
+    let mut total: u64 = 0;
     let mut checksum: u16 = 0;
     
     eprintln!("producer: begin burstsize={}B.", maximum);
@@ -156,10 +156,10 @@ fn producer(maximum: usize, mut limit: usize, output: & mpsc::SyncSender<u8>, re
     while limit > 0 {
         
         size = blocksize(maximum as usize);
-        if size > limit { size = limit }
+        if (size as u64) > limit { size = limit as usize; }
         if size > largest { largest = size; }
-        total += size;
-        limit -= size;
+        total += size as u64;
+        limit -= size as u64;
         count += 1;
             
         if DEBUG { eprintln!("producer: size={}B total={}B maximum={}B/burst.", size, total, largest); }
@@ -212,7 +212,7 @@ fn shaper(input: & mpsc::Receiver<u8>, shape: & mut throttle::Throttle, output: 
     let mut eof: bool = false;
     let mut largest: usize = 0;
     let mut alarmed: bool;
-    let mut total: usize = 0;
+    let mut total: u64 = 0;
     
     eprintln!("shaper: begin.");
     
@@ -255,7 +255,7 @@ fn shaper(input: & mpsc::Receiver<u8>, shape: & mut throttle::Throttle, output: 
         }
         if eof { break; }
         if size > largest { largest = size; }
-        total += size;
+        total += size as u64;
         
         match output.send_to(&buffer[..size], address) {
             Ok(_) => { },
@@ -307,7 +307,7 @@ fn policer(input: & net::UdpSocket, police: & mut throttle::Throttle, output: & 
     let mut count: usize = 0;
     let mut rate: f64;
     let mut peak: f64 = 0.0;
-    let mut total: usize = 0;
+    let mut total: u64 = 0;
     let mut largest: usize = 0;
     let mut admissable: bool;
     let mut admitted: usize = 0;
@@ -347,7 +347,7 @@ fn policer(input: & net::UdpSocket, police: & mut throttle::Throttle, output: & 
         
         if size > 0 {
         
-            total += size;
+            total += size as u64;
             if size > largest { largest = size; }
             
             admissable = police.admits(now, size as throttle::Events);
@@ -394,11 +394,11 @@ fn policer(input: & net::UdpSocket, police: & mut throttle::Throttle, output: & 
     eprintln!("policer: end total={}B mean={}B/burst maximum={}B/burst peak={}B/s sustained={}B/s.", total, mean, largest, peak, sustained);    
 }
 
-fn consumer(maximum: usize, input: & mpsc::Receiver<u8>, results: & mpsc::Sender<(usize, u16)>) {
+fn consumer(maximum: usize, input: & mpsc::Receiver<u8>, results: & mpsc::Sender<(u64, u16)>) {
     let mut cs: fletcher::Fletcher = fletcher::Fletcher::new();
     let mut eof: bool = false;
     let mut datum = [0u8; 1];
-    let mut total: usize = 0;
+    let mut total: u64 = 0;
     let mut checksum: u16 = 0;
    
     eprintln!("consumer: begin burstsize={}B.", maximum);
@@ -411,7 +411,7 @@ fn consumer(maximum: usize, input: & mpsc::Receiver<u8>, results: & mpsc::Sender
         }
         if eof { break; }
 
-        if DEBUG && ((total % maximum) == 0) { eprintln!("consumer: total={}B.", total); }
+        if DEBUG && ((total % (maximum as u64)) == 0) { eprintln!("consumer: total={}B.", total); }
         
         ticks::sleep(0);
         
@@ -433,10 +433,10 @@ use rustler::gcra::gcra;
 /// actual event stream, shaping it, policing it, and consuming it four threads.
 /// Returns the difference in the total byte counts and the checksums between
 /// the producer and the consumer threads.
-pub fn exercise_gcra(shape: sync::Arc<sync::Mutex<gcra::Gcra>>, police: sync::Arc<sync::Mutex<gcra::Gcra>>, maximum: usize, total: usize) -> (i64, i64) {
-    let producertotal: usize;
+pub fn exercise_gcra(shape: sync::Arc<sync::Mutex<gcra::Gcra>>, police: sync::Arc<sync::Mutex<gcra::Gcra>>, maximum: usize, total: u64) -> (i64, i64) {
+    let producertotal: u64;
     let producerchecksum: u16;
-    let consumertotal: usize;
+    let consumertotal: u64;
     let consumerchecksum: u16;
     
     eprintln!("exercise: maximum={}.", maximum);
@@ -445,8 +445,8 @@ pub fn exercise_gcra(shape: sync::Arc<sync::Mutex<gcra::Gcra>>, police: sync::Ar
     let (supply_tx, supply_rx) = mpsc::sync_channel::<u8>(maximum + 1);
     let (demand_tx, demand_rx) = mpsc::channel::<u8>();
 
-    let (consumer_tx, consumer_rx) = mpsc::channel::<(usize, u16)>();
-    let (producer_tx, producer_rx) = mpsc::channel::<(usize, u16)>();
+    let (consumer_tx, consumer_rx) = mpsc::channel::<(u64, u16)>();
+    let (producer_tx, producer_rx) = mpsc::channel::<(u64, u16)>();
 
     let source = net::UdpSocket::bind("127.0.0.1:5555").expect("couldn't bind to address");
     let sink = net::UdpSocket::bind("127.0.0.1:0").expect("couldn't bind to address");
@@ -517,10 +517,10 @@ use rustler::contract::contract;
 /// actual event stream, shaping it, policing it, and consuming it four threads.
 /// Returns the difference in the total byte counts and the checksums between
 /// the producer and the consumer threads.
-pub fn exercise_contract(shape: sync::Arc<sync::Mutex<contract::Contract>>, police: sync::Arc<sync::Mutex<contract::Contract>>, maximum: usize, total: usize) -> (i64, i64) {
-    let producertotal: usize;
+pub fn exercise_contract(shape: sync::Arc<sync::Mutex<contract::Contract>>, police: sync::Arc<sync::Mutex<contract::Contract>>, maximum: usize, total: u64) -> (i64, i64) {
+    let producertotal: u64;
     let producerchecksum: u16;
-    let consumertotal: usize;
+    let consumertotal: u64;
     let consumerchecksum: u16;
     
     eprintln!("exercise: maximum={}.", maximum);
@@ -529,8 +529,8 @@ pub fn exercise_contract(shape: sync::Arc<sync::Mutex<contract::Contract>>, poli
     let (supply_tx, supply_rx) = mpsc::sync_channel::<u8>(maximum + 1);
     let (demand_tx, demand_rx) = mpsc::channel::<u8>();
 
-    let (consumer_tx, consumer_rx) = mpsc::channel::<(usize, u16)>();
-    let (producer_tx, producer_rx) = mpsc::channel::<(usize, u16)>();
+    let (consumer_tx, consumer_rx) = mpsc::channel::<(u64, u16)>();
+    let (producer_tx, producer_rx) = mpsc::channel::<(u64, u16)>();
 
     let source = net::UdpSocket::bind("127.0.0.1:5555").expect("couldn't bind to address");
     let sink = net::UdpSocket::bind("127.0.0.1:0").expect("couldn't bind to address");

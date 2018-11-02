@@ -79,7 +79,7 @@ fn test_contract_500_exercised() {
     let jittertolerance: ticks::Ticks = gcra::jittertolerance(peakincrement, burstsize as throttle::Events);
     let sustainedincrement: ticks::Ticks = gcra::increment(512, 1, frequency);
     let bursttolerance: ticks::Ticks = contract::bursttolerance(peakincrement, 0, sustainedincrement, burstsize as throttle::Events);
-    let total: usize = 512 * 60;
+    let total: u64 = 512 * 60;
     let now: ticks::Ticks = ticks::now();
     let shape: contract::Contract = contract::Contract::new().init(peakincrement, 0, sustainedincrement, bursttolerance, now);
     let mshape: sync::Mutex<contract::Contract> = sync::Mutex::new(shape);

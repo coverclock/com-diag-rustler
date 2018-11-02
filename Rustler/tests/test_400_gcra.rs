@@ -624,7 +624,7 @@ fn test_gcra_500_exercised() {
     let increment: ticks::Ticks = gcra::increment(512, 1, frequency);
     let burstsize: usize = 64;
     let limit: ticks::Ticks = gcra::jittertolerance(increment, burstsize as throttle::Events);
-    let total: usize = 512 * 60;
+    let total: u64 = 512 * 60;
     let now: ticks::Ticks = ticks::now();
     let shape: gcra::Gcra = gcra::Gcra::new().init(increment, 0, now);
     let mshape: sync::Mutex<gcra::Gcra> = sync::Mutex::new(shape);
@@ -643,7 +643,7 @@ fn test_gcra_600_exercised() {
     let increment: ticks::Ticks = gcra::increment(1024, 1, frequency);
     let burstsize: usize = 64;
     let limit: ticks::Ticks = gcra::jittertolerance(increment, burstsize as throttle::Events);
-    let total: usize = 1024 * 60;
+    let total: u64 = 1024 * 60;
     let now: ticks::Ticks = ticks::now();
     let shape: gcra::Gcra = gcra::Gcra::new().init(increment, 0, now);
     let mshape: sync::Mutex<gcra::Gcra> = sync::Mutex::new(shape);

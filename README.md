@@ -37,14 +37,15 @@ implemented and tested the GCRA in C++, Java, C, Go, and Rust.
 * com-diag-rustler/Rustler/src/contract.rs - Implements a traffic contract throttle consisting of peak and sustained GCRAs.
 * com-diag-rustler/Rustler/src/fletcher.rs - Implements the Fletcher sixteen-bit checksum algorithm.
 * com-diag-rustler/Rustler/src/gcra.rs - Implements a Generic Cell Rate Algorithm (GCRA) throttle using a virtual scheduler.
-* com-diag-rustler/Rustler/src/harness.rs - Provides at test harness for exercising throttles.
+* com-diag-rustler/Rustler/src/lib.rs - Combines individual implementation files into rustler library.
 * com-diag-rustler/Rustler/src/throttle.rs - Describes the trait for a rate control algorithm.
 * com-diag-rustler/Rustler/src/ticks.rs - Implements basic monotonic time functions for use in rate control.
+* com-diag-rustler/Rustler/tests/harness/mod.rs - Provides a harness for testing throttles with simulated and real-time event streams.
 
 ## Executables
 
-* com-diag-rustler/Rustler/src/bin/fletch - Computes the Fletcher-16 checksum of a data stream admitted from standard input and emitted to standard output.
-* com-diag-rustler/Rustler/src/bin/shape - Shapes the data stream admitted from standard input and emitted to standard output.
+* com-diag-rustler/Rustler/src/bin/fletch.rs - Computes the Fletcher-16 checksum of a data stream admitted from standard input and emitted to standard output.
+* com-diag-rustler/Rustler/src/bin/shape.rs - Shapes the data stream admitted from standard input and emitted to standard output.
 
 ## Remarks
 
@@ -136,9 +137,9 @@ Wikipedia, "Generic cell rate algorithm", 2017-08-23,
 
 ## Targets
 
-Various versions of this software has at one time or another been installed
-and tested with the following combinations of hardware and software. Your
-mileage may vary.
+Various versions of this software have at one time or another been installed
+and tested with the following combinations of hardware targets and software
+platforms. Your mileage may vary.
 
 "Nickel"    
 Intel NUC5i7RYH    

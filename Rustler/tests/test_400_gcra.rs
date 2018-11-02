@@ -626,10 +626,10 @@ fn test_gcra_500_exercised() {
     let limit: ticks::Ticks = gcra::jittertolerance(increment, burstsize as throttle::Events);
     let total: usize = 512 * 60;
     let now: ticks::Ticks = ticks::now();
-    let mut shape: gcra::Gcra = gcra::Gcra::new().init(increment, 0, now);
+    let shape: gcra::Gcra = gcra::Gcra::new().init(increment, 0, now);
     let mshape: sync::Mutex<gcra::Gcra> = sync::Mutex::new(shape);
     let amshape: sync::Arc<sync::Mutex<gcra::Gcra>> = sync::Arc::new(mshape);
-    let mut police: gcra::Gcra = gcra::Gcra::new().init(increment, limit, now);
+    let police: gcra::Gcra = gcra::Gcra::new().init(increment, limit, now);
     let mpolice: sync::Mutex<gcra::Gcra> = sync::Mutex::new(police);
     let ampolice: sync::Arc<sync::Mutex<gcra::Gcra>> = sync::Arc::new(mpolice);
     let result = harness::exercise_gcra(amshape, ampolice, burstsize, total);
@@ -637,7 +637,6 @@ fn test_gcra_500_exercised() {
     assert!(result.1 == 0);
 }
 
-/*
 #[test]
 fn test_gcra_600_exercised() {
     let frequency: ticks::Ticks = ticks::frequency();
@@ -646,14 +645,13 @@ fn test_gcra_600_exercised() {
     let limit: ticks::Ticks = gcra::jittertolerance(increment, burstsize as throttle::Events);
     let total: usize = 1024 * 60;
     let now: ticks::Ticks = ticks::now();
-    let mut shape: gcra::Gcra = gcra::Gcra::new().init(increment, 0, now);
-    let mut police: gcra::Gcra = gcra::Gcra::new().init(increment, limit, now);
+    let shape: gcra::Gcra = gcra::Gcra::new().init(increment, 0, now);
     let mshape: sync::Mutex<gcra::Gcra> = sync::Mutex::new(shape);
-    let mpolice: sync::Mutex<gcra::Gcra> = sync::Mutex::new(police);
     let amshape: sync::Arc<sync::Mutex<gcra::Gcra>> = sync::Arc::new(mshape);
+    let police: gcra::Gcra = gcra::Gcra::new().init(increment, limit, now);
+    let mpolice: sync::Mutex<gcra::Gcra> = sync::Mutex::new(police);
     let ampolice: sync::Arc<sync::Mutex<gcra::Gcra>> = sync::Arc::new(mpolice);
     let result = harness::exercise_gcra(amshape, ampolice, burstsize, total);
     assert!(result.0 == 0);
     assert!(result.1 == 0);
 }
-*/

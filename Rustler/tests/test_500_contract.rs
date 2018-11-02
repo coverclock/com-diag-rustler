@@ -64,14 +64,13 @@ fn test_contract_400_simulated() {
     let now: ticks::Ticks = ticks::now();
     let mut shaper = contract::Contract::new().init(peakincrement, 0, sustainedincrement, bursttolerance, now);
     let mut policer = contract::Contract::new().init(peakincrement, jittertolerance, sustainedincrement, bursttolerance, now);
-    /**/
     let pair = harness::simulate(& mut shaper, & mut policer, burstsize, iterations);
-    /**/
     assert!(harness::fabs(pair.0 - 2048.0) < (2048.0 / 100.0));
     assert!(harness::fabs(pair.1 - 1024.0) < (1024.0 / 100.0));
 }
 
-/*
+use std::sync;
+
 #[test]
 fn test_contract_500_exercised() {
     let frequency: ticks::Ticks = ticks::frequency();
@@ -82,12 +81,13 @@ fn test_contract_500_exercised() {
     let bursttolerance: ticks::Ticks = contract::bursttolerance(peakincrement, 0, sustainedincrement, burstsize as throttle::Events);
     let total: usize = 512 * 60;
     let now: ticks::Ticks = ticks::now();
-    let shape: gcra::Gcra = gcra::Contract::new().init(peakincrement, 0, sustainedincrement, bursttolerance, now);
-    let police: gcra::Gcra = gcra::Contract::new().init(peakincrement, jittertolerance, sustainedincrement, bursttolerance, now);
-    /**/
-    let result = harness::exercise(& shape, & police, burstsize, total);
-    /**/
+    let shape: contract::Contract = contract::Contract::new().init(peakincrement, 0, sustainedincrement, bursttolerance, now);
+    let mshape: sync::Mutex<contract::Contract> = sync::Mutex::new(shape);
+    let amshape: sync::Arc<sync::Mutex<contract::Contract>> = sync::Arc::new(mshape);
+    let police: contract::Contract = contract::Contract::new().init(peakincrement, jittertolerance, sustainedincrement, bursttolerance, now);
+    let mpolice: sync::Mutex<contract::Contract> = sync::Mutex::new(police);
+    let ampolice: sync::Arc<sync::Mutex<contract::Contract>> = sync::Arc::new(mpolice);
+    let result = harness::exercise_contract(amshape, ampolice, burstsize, total);
     assert!(result.0 == 0);
     assert!(result.1 == 0);
 }
-*/

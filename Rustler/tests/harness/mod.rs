@@ -151,7 +151,7 @@ fn producer(maximum: usize, mut limit: usize, output: & mpsc::SyncSender<u8>, re
     let mut total: usize = 0;
     let mut checksum: u16 = 0;
     
-    eprintln!("producer: begin burstsize={}B", maximum);
+    eprintln!("producer: begin burstsize={}B.", maximum);
     
     while limit > 0 {
         
@@ -170,7 +170,7 @@ fn producer(maximum: usize, mut limit: usize, output: & mpsc::SyncSender<u8>, re
             checksum = cs.checksum(&datum[..]);
             match output.send(datum[0]) {
                 Ok(_) => { },
-                Err(_) => { panic!(); }
+                Err(error) => { panic!(error); }
             }
             size -= 1;
             
@@ -179,7 +179,7 @@ fn producer(maximum: usize, mut limit: usize, output: & mpsc::SyncSender<u8>, re
         datum[0] = 0x00;
         match output.send(datum[0]) {
             Ok(_) => { },
-            Err(_) => { panic!(); }
+            Err(error) => { panic!(error); }
         }
 
         ticks::sleep(0);
@@ -189,7 +189,7 @@ fn producer(maximum: usize, mut limit: usize, output: & mpsc::SyncSender<u8>, re
     
     match results.send((total, checksum)) {
         Ok(_) => { },
-        Err(_) => { panic!(); }
+        Err(error) => { panic!(error); }
     }    
     drop(results);
     
@@ -246,11 +246,12 @@ fn shaper(input: & mpsc::Receiver<u8>, shape: & mut throttle::Throttle, output: 
         size = 0;
         loop {            
             match input.recv() {
-                Ok(value) => { buffer[size] = value; size+=1; },
+                Ok(value) => { buffer[size] = value; },
                 Err(_) => { eof = true; }
             }
             if eof { break; }
-            if buffer[size] == 0x00 { break; }        
+            if buffer[size] == 0x00 { break; }   
+            size += 1;     
         }
         if eof { break; }
         if size > largest { largest = size; }
@@ -258,7 +259,7 @@ fn shaper(input: & mpsc::Receiver<u8>, shape: & mut throttle::Throttle, output: 
         
         match output.send_to(&buffer[..size], address) {
             Ok(_) => { },
-            Err(_) => { panic!(); }
+            Err(error) => { panic!(error); }
         }
         
         alarmed = !shape.commits(size as throttle::Events);
@@ -272,7 +273,7 @@ fn shaper(input: & mpsc::Receiver<u8>, shape: & mut throttle::Throttle, output: 
     now = ticks::now();
     shape.update(now);
     delay = shape.get_expected();
-    if DEBUG { eprintln!("consumer: delay={}s", (delay as f64) / frequency); }
+    if DEBUG { eprintln!("consumer: delay={}s.", (delay as f64) / frequency); }
     ticks::sleep(delay);
     now = ticks::now();
     shape.update(now);
@@ -282,14 +283,14 @@ fn shaper(input: & mpsc::Receiver<u8>, shape: & mut throttle::Throttle, output: 
     size = 1;
     match output.send_to(&buffer[..size], address) {
         Ok(_) => { },
-        Err(_) => { panic!(); }
+        Err(error) => { panic!(error); }
     }
     
     let average: f64 = (accumulated as f64) / (count as f64) / frequency;
     let mean: f64 = (total as f64) / (count as f64);
     let sustained: f64 = (total as f64) * frequency / ((after - before) as f64);
     
-    eprintln!("shaper: end total={}B mean={}B/burst maximum={}B/burst delay={}s/burst peak={}B/s sustained={}B/s", total, mean, largest, average, peak, sustained);    
+    eprintln!("shaper: end total={}B mean={}B/burst maximum={}B/burst delay={}s/burst peak={}B/s sustained={}B/s.", total, mean, largest, average, peak, sustained);    
 }
 
 fn policer(input: & net::UdpSocket, police: & mut throttle::Throttle, output: & mpsc::Sender<u8>) {
@@ -319,7 +320,7 @@ fn policer(input: & net::UdpSocket, police: & mut throttle::Throttle, output: & 
         
         match input.recv_from(& mut buffer) {
             Ok(value) => { size = value.0; }
-            Err(_) => { panic!(); }
+            Err(error) => { panic!(error); }
         }
         assert!(size > 0);
 
@@ -360,7 +361,7 @@ fn policer(input: & net::UdpSocket, police: & mut throttle::Throttle, output: & 
             while index < size {
                 match output.send(buffer[index]) {
                     Ok(_) => { },
-                    Err(_) => { panic!(); }
+                    Err(error) => { panic!(error); }
                 }
                 index += 1;
             }
@@ -388,7 +389,7 @@ fn policer(input: & net::UdpSocket, police: & mut throttle::Throttle, output: & 
     let sustained: f64 = (total as f64) * frequency / ((after - before) as f64);
     
     eprintln!("policer: count={} admitted={} policed={}", count, admitted, policed);
-    eprintln!("policer: end total={}B mean={}B/burst maximum={}B/burst peak={}B/s sustained={}B/s", total, mean, largest, peak, sustained);    
+    eprintln!("policer: end total={}B mean={}B/burst maximum={}B/burst peak={}B/s sustained={}B/s.", total, mean, largest, peak, sustained);    
 }
 
 fn consumer(maximum: usize, input: & mpsc::Receiver<u8>, results: & mpsc::Sender<(usize, u16)>) {
@@ -398,7 +399,7 @@ fn consumer(maximum: usize, input: & mpsc::Receiver<u8>, results: & mpsc::Sender
     let mut total: usize = 0;
     let mut checksum: u16 = 0;
    
-    eprintln!("consumer: begin burstsize={}B", maximum);
+    eprintln!("consumer: begin burstsize={}B.", maximum);
     
     loop {
 
@@ -416,17 +417,17 @@ fn consumer(maximum: usize, input: & mpsc::Receiver<u8>, results: & mpsc::Sender
     
     match results.send((total, checksum)) {
         Ok(_) => { },
-        Err(_) => { panic!(); }
+        Err(error) => { panic!(error); }
     }    
     drop(results);
     
-    eprintln!("consumer: end total={}B", total);
+    eprintln!("consumer: end total={}B.", total);
 }
 
 use std::sync;
 use rustler::gcra::gcra;
 
-/// Exercise a shaping throttle and a policing throttle by producing an
+/// Exercise a shaping gcra and a policing gcra by producing an
 /// actual event stream, shaping it, policing it, and consuming it four threads.
 /// Returns the difference in the total byte counts and the checksums between
 /// the producer and the consumer threads.
@@ -436,8 +437,8 @@ pub fn exercise_gcra(shape: sync::Arc<sync::Mutex<gcra::Gcra>>, police: sync::Ar
     let consumertotal: usize;
     let consumerchecksum: u16;
     
-    eprintln!("exercise: maximum={}", maximum);
-    eprintln!("exercise: total={}", total);
+    eprintln!("exercise: maximum={}.", maximum);
+    eprintln!("exercise: total={}.", total);
 
     let (supply_tx, supply_rx) = mpsc::sync_channel::<u8>(maximum + 1);
     let (demand_tx, demand_rx) = mpsc::channel::<u8>();
@@ -475,14 +476,17 @@ pub fn exercise_gcra(shape: sync::Arc<sync::Mutex<gcra::Gcra>>, police: sync::Ar
         Ok(_) => { },
         Err(error) => { panic!(error); }
     }
+
     match policing.join() {
         Ok(_) => { },
         Err(error) => { panic!(error); }
     }
+
     match shaping.join() {
         Ok(_) => { },
         Err(error) => { panic!(error); }
     }
+ 
     match producing.join() {
         Ok(_) => { },
         Err(error) => { panic!(error); }
@@ -501,6 +505,90 @@ pub fn exercise_gcra(shape: sync::Arc<sync::Mutex<gcra::Gcra>>, police: sync::Ar
         Err(error) => { panic!(error); }
     }
     eprintln!("exercise: consumer={}:{:04x}.", consumertotal, consumerchecksum);
+    
+    (((consumertotal- producertotal) as i64), ((consumerchecksum - producerchecksum) as i64))
+}
+
+use rustler::contract::contract;
+
+/// Exercise a shaping contract and a policing contract by producing an
+/// actual event stream, shaping it, policing it, and consuming it four threads.
+/// Returns the difference in the total byte counts and the checksums between
+/// the producer and the consumer threads.
+pub fn exercise_contract(shape: sync::Arc<sync::Mutex<contract::Contract>>, police: sync::Arc<sync::Mutex<contract::Contract>>, maximum: usize, total: usize) -> (i64, i64) {
+    let producertotal: usize;
+    let producerchecksum: u16;
+    let consumertotal: usize;
+    let consumerchecksum: u16;
+    
+    eprintln!("exercise: maximum={}.", maximum);
+    eprintln!("exercise: total={}.", total);
+
+    let (supply_tx, supply_rx) = mpsc::sync_channel::<u8>(maximum + 1);
+    let (demand_tx, demand_rx) = mpsc::channel::<u8>();
+
+    let (consumer_tx, consumer_rx) = mpsc::channel::<(usize, u16)>();
+    let (producer_tx, producer_rx) = mpsc::channel::<(usize, u16)>();
+
+    let source = net::UdpSocket::bind("127.0.0.1:5555").expect("couldn't bind to address");
+    let sink = net::UdpSocket::bind("127.0.0.1:0").expect("couldn't bind to address");
+    let destination = net::SocketAddrV4::new(net::Ipv4Addr::new(127, 0, 0, 1), 5555);
+       
+    eprintln!("exercise: Spawning.");
+   
+    let consuming = thread::spawn( move || {
+        consumer(maximum, & demand_rx, & consumer_tx)
+    } );
+
+    let policing  = thread::spawn( move || {
+        let mut throttle: contract::Contract = *police.lock().unwrap();
+        policer(& source, & mut throttle, & demand_tx)
+    } );
+
+    let shaping   = thread::spawn( move || {
+        let mut throttle: contract::Contract = *shape.lock().unwrap();
+        shaper(& supply_rx, & mut throttle, & sink, & destination)
+    } );
+
+    let producing = thread::spawn( move || {
+        producer(maximum, total, & supply_tx, & producer_tx)
+    } );
+    
+    eprintln!("exercise: Joining.");
+
+    match consuming.join() {
+        Ok(_) => { },
+        Err(error) => { panic!(error); }
+    }
+
+    match policing.join() {
+        Ok(_) => { },
+        Err(error) => { panic!(error); }
+    }
+
+    match shaping.join() {
+        Ok(_) => { },
+        Err(error) => { panic!(error); }
+    }
+ 
+    match producing.join() {
+        Ok(_) => { },
+        Err(error) => { panic!(error); }
+    }
+
+    eprintln!("exercise: Checking.");
+    
+    match producer_rx.recv() {
+        Ok(value) => { producertotal = value.0; producerchecksum = value.1; },
+        Err(error) => { panic!(error); }
+    }
+    eprintln!("exercise: produced={}:0x{:04x}.", producertotal, producerchecksum);
+ 
+    match consumer_rx.recv() {
+        Ok(value) => { consumertotal = value.0; consumerchecksum = value.1; },
+        Err(error) => { panic!(error); }
+    }
+    eprintln!("exercise: consumer={}:0x{:04x}.", consumertotal, consumerchecksum);
     
     (((consumertotal- producertotal) as i64), ((consumerchecksum - producerchecksum) as i64))
 }

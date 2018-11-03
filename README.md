@@ -55,7 +55,7 @@ just get your program to compile, it frequently works the first time."
 
 I think my main issue with Rust was how under-documented it is. In
 order to do the kinds of things I routinely do (and which are trivial
-in Go), you must have an extraordinaryly high level of expertise in the
+in Go), you must have an extraordinarily high level of expertise in the
 language. Also, because the language is immature and still changing,
 many of the examples you find online simply don't compile.  This made the
 learning experience especially painful and often a matter of laborious
@@ -67,7 +67,11 @@ I especially like Rust's memory management model. Instead of garbage
 collecting in the background like Go (and Java (and Python (and ...))),
 it uses a limited form of reference counting, and restricts how you can
 use references (effectively pointers) so that it can manage the lifetime
-of variables mostly through scope. It's pretty clever.
+of variables mostly through scope. It also restricts how you can use
+threads in order to eliminate data races. It's pretty clever. It makes
+writing idiomatic Rust challenging, however, because it eliminates
+many of the common patterns I use with threads (that not necessarily
+a bad thing).
 
 I also appreciate how trivial it was to call a C function from libc
 using Rust. Since most stuff I work on entails integrating with some

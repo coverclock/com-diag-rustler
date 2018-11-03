@@ -213,7 +213,7 @@ Here is a cut and paste of the output of the functional test running on an x86_6
     Sustained: 1023.9944224969396Bps.
     Checksum: 0x9c87.
 
-And here is the same function test running on an ARMv7 target.
+And here is the same functional test running on an ARMv7 target.
 
     $ dd if=/dev/urandom count=1000 | ./target/debug/fletch -V -b 512 | ./target/debug/shape -V -p 2048 -s 1024 -b 512 | ./target/debug/fletch -V -b 512 > /dev/null
     Contract: Contract@0x7e9a78b8[112]:{p:Gcra@0x7e9a78b8[56]:{t:488282,i:488282,l:0,x:0,x1:0,f:{0,0,0},e:{1,1,1},a:{0,0}},s:Gcra@0x7e9a78f0[56]:{t:976563,i:976563,l:249511591,x:0,x1:0,f:{0,0,0},e:{1,1,1},a:{0,0}}}

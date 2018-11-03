@@ -49,30 +49,30 @@ implemented and tested the GCRA in C++, Java, C, Go, and Rust.
 
 ## Remarks
 
-My experience writing in Rust reminds me of a comment a colleage of mine made
-decades ago about the Ada programming language: "If you can just get your
-program to compile, it frequently works the first time."
+My experience writing in Rust reminds me of a comment a colleague of
+mine made decades ago about the Ada programming language: "If you can
+just get your program to compile, it frequently works the first time."
 
-I think my main issue with Rust was how under-documented it is. In order to
-do the kinds of things I routinely do (and which are trivial in Go), you must
-have an extraordinaryly high level of expertise in the language. Also, because
-the language is immature and still changing, many of the examples you find
-online simply don't compile.
-This made the learning experience especially painful and often a matter of
-laborious reverse engineering or trial and error. And unlike Go, I didn’t
-find using Rust intuitive; for me, it was difficult to predict its
-syntax and semantics. But there is much to admire about Rust.
+I think my main issue with Rust was how under-documented it is. In
+order to do the kinds of things I routinely do (and which are trivial
+in Go), you must have an extraordinaryly high level of expertise in the
+language. Also, because the language is immature and still changing,
+many of the examples you find online simply don't compile.  This made the
+learning experience especially painful and often a matter of laborious
+reverse engineering or trial and error. And unlike Go, I didn’t find
+using Rust intuitive; for me, it was difficult to predict its syntax
+and semantics. But there is much to admire about Rust.
 
-I especially like Rust's memory management model. Instead of garbage collecting
-in the background like Go (and Java (and Python (and ...))), it uses a
-limited form of reference counting, and restricts how you can use references
-(effectively pointers) so that it can manage the lifetime of variables mostly
-through scope. It's pretty clever.
+I especially like Rust's memory management model. Instead of garbage
+collecting in the background like Go (and Java (and Python (and ...))),
+it uses a limited form of reference counting, and restricts how you can
+use references (effectively pointers) so that it can manage the lifetime
+of variables mostly through scope. It's pretty clever.
 
-I also appreciate how trivial it was to call a C function from libc using
-Rust. Since most stuff I work on entails integrating with some legacy
-framework or library (typically to manage some custom hardware), this is
-an important feature.
+I also appreciate how trivial it was to call a C function from libc
+using Rust. Since most stuff I work on entails integrating with some
+legacy framework or library (typically to manage some custom hardware),
+this is an important feature.
 
 In the past few years of consulting on embedded product development
 projects, I've seen a trend in clients bringing in an embedded expert (me)
@@ -81,12 +81,13 @@ devlopers working in, for example, Python or JavaScript, to do the higher
 level development. With Rust, I would expect this times ten, providing you
 could find an actual legitimate Rust expert at all. While I appreciate the
 Rust strategy of making thread race conditions or memory leaks virtually
-impossible by stringent compile time checking, you have to compare that with
-the cost of writing Rust code; the economics of this eludes me.
-You have the choice between finding an experienced Rust developer, or finding
-an experienced C or C++ developer who can write code without such flaws. I
-suspect that as difficult as the latter is, it is a lot easier than the former,
-even though the correctness of the Rust code is probably more credible.
+impossible by stringent compile time checking, you have to compare that
+with the cost of writing Rust code; the economics of this eludes me.
+You have the choice between finding an experienced Rust developer, or
+finding an experienced C or C++ developer who can write code without
+such flaws. I suspect that as difficult as the latter is, it is a lot
+easier than the former, even though the correctness of the Rust code is
+probably more credible.
 
 Or you could just write in Go, and get to market a lot quicker.
 
@@ -190,7 +191,7 @@ Valgrind works just fine with Rust, unlike my experience with Go.
 
 ### Functional Test Output
 
-Here is a cut and paste of the output of one of the functional tests.
+Here is a cut and paste of the output of the functional test running on an x86_64 target.
 
     $ dd if=/dev/urandom count=1000 | ./target/debug/fletch -V -b 512 | ./target/debug/shape -V -p 2048 -s 1024 -b 512 | ./target/debug/fletch -V -b 512 > /dev/null
     Contract: Contract@0x7e90e8f8[112]:{p:Gcra@0x7e90e8f8[56]:{t:488282,i:488282,l:0,x:0,x1:0,f:{0,0,0},e:{1,1,1},a:{0,0}},s:Gcra@0x7e90e930[56]:{t:976563,i:976563,l:249511591,x:0,x1:0,f:{0,0,0},e:{1,1,1},a:{0,0}}}
@@ -211,6 +212,28 @@ Here is a cut and paste of the output of one of the functional tests.
     Peak: 4913958.297759311Bps.
     Sustained: 1023.9944224969396Bps.
     Checksum: 0x9c87.
+
+And here is the same function test running on an ARMv7 target.
+
+    $ dd if=/dev/urandom count=1000 | ./target/debug/fletch -V -b 512 | ./target/debug/shape -V -p 2048 -s 1024 -b 512 | ./target/debug/fletch -V -b 512 > /dev/null
+    Contract: Contract@0x7e9a78b8[112]:{p:Gcra@0x7e9a78b8[56]:{t:488282,i:488282,l:0,x:0,x1:0,f:{0,0,0},e:{1,1,1},a:{0,0}},s:Gcra@0x7e9a78f0[56]:{t:976563,i:976563,l:249511591,x:0,x1:0,f:{0,0,0},e:{1,1,1},a:{0,0}}}
+    1000+0 records in
+    1000+0 records out
+    512000 bytes (512 kB, 500 KiB) copied, 369.231 s, 1.4 kB/s
+    Total: 512000B.
+    Average: 512B/io.
+    Peak: 2325021.683551834Bps.
+    Sustained: 1160.4047591161268Bps.
+    Checksum: 0x3d9c.
+    Total: 512000B.
+    Average: 511.4885114885115B/io.
+    Peak: 2042.8640273773146Bps.
+    Sustained: 1023.9984717846808Bps.
+    Total: 512000B.
+    Average: 356.79442508710804B/io.
+    Peak: 4515713.826021667Bps.
+    Sustained: 1023.9906263877581Bps.
+    Checksum: 0x3d9c.
 
 ### usize
 

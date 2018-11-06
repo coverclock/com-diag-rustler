@@ -81,7 +81,7 @@ this is an important feature.
 In the past few years of consulting on embedded product development
 projects, I've seen a trend in clients bringing in an embedded expert (me)
 to handle the low level stuff in C or C++, and use much less expensive
-devlopers working in, for example, Python or JavaScript, to do the higher
+developers working in, for example, Python or JavaScript, to do the higher
 level development. With Rust, I would expect this times ten, providing you
 could find an actual legitimate Rust expert at all. While I appreciate the
 Rust strategy of making thread race conditions or memory leaks virtually
